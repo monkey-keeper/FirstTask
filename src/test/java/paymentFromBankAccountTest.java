@@ -62,7 +62,7 @@ public class paymentFromBankAccountTest {
 
     /**
      * Должно вывести сообщение - Insufficient funds in the account
-     * Недостаточно средств на балансе
+     * Недостаточно средств на балансе.
      */
     @Test
     public void paymentWithInsufficientAmount(){

@@ -73,7 +73,7 @@ public class HistorySortedByAmountTest {
     }
 
     /**
-     * Сортировка должна быть от больше к меньшему, но что-то сделал не так
+     * Сортировка должна быть от большего значения транзакции к меньшему, но что-то сделал не так
      */
     @Test
     public void shouldReturnSortedTransactionTreeMap() {

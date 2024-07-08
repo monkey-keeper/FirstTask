@@ -39,13 +39,16 @@ public class ReplenishmentBankAccountTest {
     }
 
     /**
-     * Баланс аккаунта = 0, пополняем его на переданное значение
+     * Баланс аккаунта = 0, пополняем его на переданное значение (10)
      */
     @Test
     public void shouldReplenishmentBankAccount(){
         analyticsService.replenishmentBankAccount(bankAccount, BigDecimal.TEN);
     }
 
+    /**
+     * Банк аккаунт равен null, получаем исключение NullPointerException
+     */
     @Test(expected = NullPointerException.class)
     public void nullBankAccountShouldReturnNullPointerException(){
         analyticsService.replenishmentBankAccount(null, BigDecimal.TEN);

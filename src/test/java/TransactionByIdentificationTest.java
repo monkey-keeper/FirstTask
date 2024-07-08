@@ -24,6 +24,7 @@ public class TransactionByIdentificationTest {
     private User user;
     private List<Transaction> transactions = new ArrayList<>();
     private List<BankAccount> bankAccounts = new ArrayList<>();
+
     @Before
     public void initializeAnalyticsService() {
         analyticsService = new AnalyticsService();
@@ -35,7 +36,7 @@ public class TransactionByIdentificationTest {
     }
 
     public void initializeUser() {
-        user = new User("2", "Misha", "Timoshenko", "Mikhailovich",
+        user = new User("2", "User1", "MiddleName", "LastName",
                 LocalDate.of(1997, 5, 20),
                 bankAccounts);
     }
@@ -43,7 +44,7 @@ public class TransactionByIdentificationTest {
 
     public void initializeBankAccount() {
         bankAccount = new BankAccount("1", new BigDecimal(150),
-                new User("2", "Misha", "Timoshenko", "Mikhailovich",
+                new User("2", "User1", "MiddleName", "LastName",
                         LocalDate.of(1997, 5, 20),
                         bankAccounts), transactions);
     }
@@ -78,7 +79,7 @@ public class TransactionByIdentificationTest {
     @Test
     public void getTransactionByIdentificationTest(){
         LinkedHashMap<LocalDateTime, Transaction> transactionListByIdentification =
-                analyticsService.getTransactionListByIdentification(user, 3);
+                analyticsService.getTransactionListByIdentification(user, 4);
         System.out.println(transactionListByIdentification);
 
     }

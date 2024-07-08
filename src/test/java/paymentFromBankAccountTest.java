@@ -53,7 +53,7 @@ public class paymentFromBankAccountTest {
     }
 
     /**
-     * Начальный баланс 200, делаем оплату на сумму 120
+     * Начальный баланс 200, делаем оплату на сумму 120, результат 80
      */
     @Test
     public void shouldPaymentFromBankAccount(){

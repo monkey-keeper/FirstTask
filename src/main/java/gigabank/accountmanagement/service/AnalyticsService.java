@@ -160,16 +160,18 @@ public class AnalyticsService {
     public PriorityQueue<Transaction> getLargestUserTransaction(User user, int num) {
         PriorityQueue<Transaction> result = new PriorityQueue<>(Comparator.comparing(transaction -> transaction.getValue(),
                 Comparator.reverseOrder()));
-
         List<Transaction> transactionsList = new ArrayList<>();
+
             for (BankAccount bankAccount : user.getBankAccounts()) {
                 for (Transaction transaction : bankAccount.getTransactions()) {
-                    if(!bankAccount.getTransactions().isEmpty()){
+                    if(!bankAccount.getTransactions().isEmpty() && bankAccount.getTransactions().size() >= num){
                         if (transaction.getType() == PAYMENT) {
                             transactionsList.add(transaction);
                         }else{
                             System.out.println("Incorrect transaction type");
                         }
+                    }else{
+                        System.out.println("Нет транзакций за указанный период!");
                     }
                 }
             }

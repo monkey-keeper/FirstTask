@@ -49,9 +49,9 @@ public class getMonthlySpendingByCategoryTest {
 
     public void initializeTransaction() {
         transaction1 = new Transaction("1", new BigDecimal(100), TransactionType.PAYMENT,
-                "Health", bankAccount, LocalDateTime.of(2024, 6, 5, 14, 12));
+                "Health", bankAccount, LocalDateTime.of(2024, 6, 15, 14, 12));
         transaction2 = new Transaction("2", new BigDecimal(120), TransactionType.PAYMENT,
-                "Health", bankAccount, LocalDateTime.of(2024, 6, 3, 14, 12));
+                "Health", bankAccount, LocalDateTime.of(2024, 6, 12, 14, 12));
     }
 
 

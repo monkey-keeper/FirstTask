@@ -62,16 +62,16 @@ public class GetMonthlySpendingTest {
 
     public void initializeTransaction() {
         transaction1 = new Transaction("1", new BigDecimal(100), TransactionType.PAYMENT,
-                "Health", bankAccount, LocalDateTime.of(2024, 5, 29, 14, 12));
+                "Health", bankAccount, LocalDateTime.of(2024, 6, 12, 14, 12));
 
         transaction2 = new Transaction("2", new BigDecimal(120), TransactionType.PAYMENT,
-                "Beauty", bankAccount, LocalDateTime.of(2024, 5, 30, 14, 12));
+                "Beauty", bankAccount, LocalDateTime.of(2024, 6, 15, 14, 12));
 
         transaction3 = new Transaction("3", new BigDecimal(160), TransactionType.PAYMENT,
-                "Education", bankAccount, LocalDateTime.of(2024, 6, 3, 14, 12));
+                "Education", bankAccount, LocalDateTime.of(2024, 6, 10, 14, 12));
 
         transaction4 = new Transaction("4", new BigDecimal(110), TransactionType.PAYMENT,
-                "Education", bankAccount, LocalDateTime.of(2024, 6, 5, 14, 12));
+                "Education", bankAccount, LocalDateTime.of(2024, 6, 9, 14, 12));
 
         transaction5 = new Transaction("4", new BigDecimal(110), TransactionType.DEPOSIT,
                 "Incorrect", bankAccount, LocalDateTime.of(2024, 6, 5, 14, 12));
@@ -92,6 +92,9 @@ public class GetMonthlySpendingTest {
         bankAccount2.getOwner().getBankAccounts().add(bankAccount2);
     }
 
+    /**
+     * Суммируем количество трат по категориям
+     */
     @Test
     public void shouldReturnMonthlySpendingByCategories() {
         Map<String, BigDecimal> monthlySpendingByCategories = analyticsService.getMonthlySpendingByCategories(user,
@@ -101,7 +104,7 @@ public class GetMonthlySpendingTest {
     }
 
     /**
-     * Здесь у user2 указан неверный тип транзакции
+     * Здесь у user2 указан неверный тип транзакции, должно вернуть пустую мапу
      */
     @Test
     public void noTransactionTypePaymentShouldReturnEmptyHashMap() {
@@ -112,7 +115,7 @@ public class GetMonthlySpendingTest {
     }
 
     /**
-     * Здесь у user2 указана неверная категория транзакции
+     * Здесь у user2 указана неверная категория транзакции, должно вернуть пустую мапу
      */
     @Test
     public void incorrectCategoryTypeShouldReturnEmptyHashMap() {

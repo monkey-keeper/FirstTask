@@ -3,6 +3,7 @@ import gigabank.accountmanagement.entity.Transaction;
 import gigabank.accountmanagement.entity.TransactionType;
 import gigabank.accountmanagement.entity.User;
 import gigabank.accountmanagement.service.AnalyticsService;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -67,7 +68,7 @@ public class LargestUserTransactionTest {
         transaction3 = new Transaction("3", new BigDecimal(160), TransactionType.PAYMENT,
                 "Education", bankAccount, LocalDateTime.of(2024, 6, 3, 14, 12));
 
-        transaction4 = new Transaction("4", new BigDecimal(110), TransactionType.PAYMENT,
+        transaction4 = new Transaction("4", new BigDecimal(110), TransactionType.DEPOSIT,
                 "Education", bankAccount, LocalDateTime.of(2024, 6, 5, 14, 12));
 
         transaction5 = new Transaction("4", new BigDecimal(110), TransactionType.DEPOSIT,
@@ -78,11 +79,10 @@ public class LargestUserTransactionTest {
         bankAccount.getTransactions().add(transaction1);
         bankAccount.getTransactions().add(transaction2);
         bankAccount.getTransactions().add(transaction3);
-        bankAccount.getTransactions().add(transaction4);
 
+
+        bankAccount2.getTransactions().add(transaction4);
         bankAccount2.getTransactions().add(transaction5);
-        bankAccount2.getTransactions().add(transaction1);
-        bankAccount2.getTransactions().add(transaction3);
     }
 
     public void addBankAccountToBankAccountList() {
@@ -96,19 +96,18 @@ public class LargestUserTransactionTest {
     @Test
     public void getLargestUserTransactionValue(){
         PriorityQueue<Transaction> largestUserTransaction =
-                analyticsService.getLargestUserTransaction(user, 2);
+                analyticsService.getLargestUserTransaction(user, 3);
         System.out.println(largestUserTransaction);
     }
 
     /**
-     * Здесь у user2 есть транзакции неверного типа,
-     * должно вывести сообщение в консоль, что тип неправильный
+     * Здесь у user2 транзакции неверного типа, получаем ошибку IndexOutOfBoundsException
      */
-    @Test
+    @Test(expected = IndexOutOfBoundsException.class)
     public void getLargestUserTransactionValueWithIncorrectTransactionType(){
         PriorityQueue<Transaction> largestUserTransaction =
                 analyticsService.getLargestUserTransaction(user2, 1);
-        System.out.println(largestUserTransaction);
+        Assert.assertEquals("Incorrect transaction type", largestUserTransaction);
     }
 
     /**
@@ -117,7 +116,7 @@ public class LargestUserTransactionTest {
     @Test(expected = NullPointerException.class)
     public void getLargestUserTransactionValueWithNullUser(){
         PriorityQueue<Transaction> largestUserTransaction =
-                analyticsService.getLargestUserTransaction(null, 2);
+                analyticsService.getLargestUserTransaction(null, 5);
         System.out.println(largestUserTransaction);
     }
 }

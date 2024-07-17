@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Сервис предоставляет аналитику по операциям пользователей
@@ -29,14 +30,14 @@ public class AnalyticsService {
         if (bankAccount == null || !TRANSACTION_SERVICE.isValidCategories(category))
             return amount;
 
-        for (Transaction transaction : bankAccount.getTransactions()) {
-            if (TransactionType.PAYMENT.equals(transaction.getType())
-                    && StringUtils.equals(transaction.getCategory(), category)
-                    && transaction.getCreatedDate().isAfter(ONE_MONTH)) {
-                amount = amount.add(transaction.getValue());
-            }
-        }
-        return amount;
+        amount = bankAccount.getTransactions().stream()
+                .filter(transaction -> TransactionType.PAYMENT.equals(transaction.getType()))
+                .filter(transaction -> StringUtils.equals(transaction.getCategory(), category))
+                .filter(transaction -> transaction.getCreatedDate().isAfter(ONE_MONTH))
+                .map(Transaction::getValue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+         return amount;
     }
 
     /**
@@ -53,15 +54,12 @@ public class AnalyticsService {
         if (user == null || validCategories.isEmpty())
             return result;
 
-        for (BankAccount bankAccount : user.getBankAccounts()){
-            for(Transaction transaction : bankAccount.getTransactions()){
-                if (TransactionType.PAYMENT.equals(transaction.getType())
-                        && validCategories.contains(transaction.getCategory())
-                        && transaction.getCreatedDate().isAfter(ONE_MONTH)){
-                    result.merge(transaction.getCategory(), transaction.getValue(), BigDecimal::add);
-                }
-            }
-        }
+        result = user.getBankAccounts().stream()
+                .flatMap(bankAccount -> bankAccount.getTransactions().stream())
+                .filter(transaction -> TransactionType.PAYMENT.equals(transaction.getType()))
+                .filter(transaction -> validCategories.contains(transaction.getCategory()))
+                .filter(transaction -> transaction.getCreatedDate().isAfter(ONE_MONTH))
+                .collect(Collectors.toMap(Transaction::getCategory, Transaction::getValue, BigDecimal::add));
 
         return result;
     }
@@ -76,19 +74,11 @@ public class AnalyticsService {
         if (user == null)
             return result;
 
-         List<Transaction> transactions = new ArrayList<>();
-        for (BankAccount bankAccount : user.getBankAccounts()){
-            for (Transaction transaction : bankAccount.getTransactions()){
-                if (TransactionType.PAYMENT.equals(transaction.getType()))
-                    result.computeIfAbsent(transaction.getCategory(), k -> new ArrayList<>()).add(transaction);
-                    // transactions.add(transaction);
-            }
-        }
-
-        transactions.sort(Comparator.comparing(Transaction::getValue));
-        for (Transaction transaction : transactions){
-            result.computeIfAbsent(transaction.getCategory(), k -> new ArrayList<>()).add(transaction);
-        }
+        result = user.getBankAccounts().stream()
+                        .flatMap(bankAccount -> bankAccount.getTransactions().stream())
+                        .filter(transaction -> TransactionType.PAYMENT.equals(transaction.getType()))
+                        .sorted(Comparator.comparing(Transaction::getValue))
+                        .collect(Collectors.groupingBy(Transaction::getCategory, LinkedHashMap::new, Collectors.toList()));
 
         return result;
     }
@@ -105,15 +95,11 @@ public class AnalyticsService {
         if (user == null)
             return result;
 
-        for (BankAccount bankAccount : user.getBankAccounts()){
-            allTransaction.addAll(bankAccount.getTransactions());
-        }
-        // .sort((t1, t2) -> t2.getCreatedDate().compareTo(t1.getCreatedDate())); --> так не хочет работать не видит .getCreatedDate()
-        allTransaction.sort(Comparator.comparing(Transaction::getCreatedDate).reversed());
-
-        for (int i = 0; i < Math.min(n, allTransaction.size()); i++) {
-            result.add(allTransaction.get(i));
-        }
+        result = user.getBankAccounts().stream()
+                .flatMap(bankAccount -> bankAccount.getTransactions().stream())
+                .sorted(Comparator.comparing(Transaction::getCreatedDate).reversed())
+                .limit(n)
+                .collect(Collectors.toList());
 
         return result;
     }
@@ -129,20 +115,12 @@ public class AnalyticsService {
         if (user == null)
             return result;
 
-
-        for (BankAccount bankAccount : user.getBankAccounts()){
-            for (Transaction transaction : bankAccount.getTransactions()){
-                if (TransactionType.PAYMENT.equals(transaction.getType())){
-                    if (result.size() < n)
-                        result.offer(transaction);
-                    else if (result.peek() != null
-                            && result.peek().getValue().compareTo(transaction.getValue()) < 0){
-                        result.poll();
-                        result.offer(transaction);
-                    }
-                }
-            }
-        }
+        result = user.getBankAccounts().stream()
+                .flatMap(bankAccount -> bankAccount.getTransactions().stream())
+                .filter(transaction -> TransactionType.PAYMENT.equals(transaction.getType()))
+                .sorted(Comparator.comparing(Transaction::getValue).reversed())
+                .limit(n)
+                .collect(Collectors.toCollection(() -> new PriorityQueue<>(Comparator.comparing(Transaction::getValue).reversed())));
 
         return result;
     }

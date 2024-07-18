@@ -125,5 +125,39 @@ public class AnalyticsService {
         return result;
     }
 
+    public long analyzePerformance(List<Transaction> transactions){
+
+        if(transactions.isEmpty())
+            return 0L;
+
+        long startTime = System.nanoTime();
+        List<Transaction> consistent = transactions.stream()
+                .filter(transaction -> TransactionType.PAYMENT.equals(transaction.getType()))
+                .filter(transaction -> transaction.getCreatedDate().isAfter(ONE_MONTH))
+                .filter(transaction -> transaction.getValue().compareTo(new BigDecimal("10.00")) > 0)
+                .sorted(Comparator.comparing(Transaction::getValue))
+                .sorted(Comparator.comparing(Transaction::getCreatedDate))
+                .sorted(Comparator.comparing(Transaction::getCategory))
+                .toList();
+        long endTime = System.nanoTime();
+
+        long consistentTime = endTime - startTime;
+
+        startTime = System.nanoTime();
+        List<Transaction> concurrent = transactions.stream().parallel()
+                .filter(transaction -> TransactionType.PAYMENT.equals(transaction.getType()))
+                .filter(transaction -> transaction.getCreatedDate().isAfter(ONE_MONTH))
+                .filter(transaction -> transaction.getValue().compareTo(new BigDecimal("10.00")) > 0)
+                .sorted(Comparator.comparing(Transaction::getValue))
+                .sorted(Comparator.comparing(Transaction::getCreatedDate))
+                .sorted(Comparator.comparing(Transaction::getCategory))
+                .toList();
+        endTime = System.nanoTime();
+
+        long concurrentTime = endTime - startTime;
+
+        return consistentTime - concurrentTime;
+    }
+
 
 }

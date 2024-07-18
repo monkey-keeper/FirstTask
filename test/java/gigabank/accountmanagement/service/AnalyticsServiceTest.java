@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -188,4 +189,22 @@ class AnalyticsServiceTest {
         assertEquals(0, result3.size());
 
     }
+
+    @Test
+    void analyzePerformance(){
+        long result = analyticsService.analyzePerformance(bankAccount1.getTransactions());
+        assertNotNull(result);
+        assertTrue(result < 0); // --> следовательно параллельные стримы обработываются дольше
+        BankAccount testBankAccount = bankAccount1;
+        testBankAccount.getTransactions().add(new Transaction("3", TEN_DOLLARS, TransactionType.PAYMENT
+                , BEAUTY_CATEGORY, ONE_DAY_AGO));
+        testBankAccount.getTransactions().add(new Transaction("4", FIFTEEN_DOLLARS, TransactionType.PAYMENT
+                , FOOD_CATEGORY, ONE_DAY_AGO));
+        testBankAccount.getTransactions().add(new Transaction("5", TWENTY_DOLLARS, TransactionType.PAYMENT
+                , EDUCATION_CATEGORY, ONE_DAY_AGO));
+        long result1 = analyticsService.analyzePerformance(testBankAccount.getTransactions());
+        assertTrue(result1 < 0);
+    }
+
+
 }

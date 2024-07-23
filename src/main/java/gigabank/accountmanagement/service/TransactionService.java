@@ -99,6 +99,8 @@ public class TransactionService {
      * @return возвращает объединённый список транзакций
      */
     public List<Transaction> mergeTransactionList (List<Transaction> list1, List<Transaction> list2, BiFunction<List<Transaction>, List<Transaction>, List<Transaction>> merger){
+        if (list1 == null || list2 == null)
+            return Collections.emptyList();
         return merger.apply(list1, list2);
     }
 }

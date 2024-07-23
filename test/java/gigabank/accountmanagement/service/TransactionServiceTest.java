@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.function.Predicate;
+import java.util.*;
+import java.util.function.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -80,21 +80,62 @@ class TransactionServiceTest {
 
     @Test
     void transformTransaction() {
+        Function<Transaction, String> function = transaction -> transaction.getId() + " : " + transaction.getCategory()
+                + " : " + transaction.getValue();
+        List<String> result = transactionService.transformTransaction(user, function);
+        assertEquals(9, result.size());
+        assertTrue(result.contains("1 : Food : 10.00"));
+        assertTrue(result.contains("7 : Food : 15.00"));
 
+        List<String> result1 = transactionService.transformTransaction(null, function);
+        assertEquals(0, result1.size());
     }
 
     @Test
     void processTransactions() {
+        Set<String> processCategory = new HashSet<>();
+        Consumer<Transaction> consumer = transaction -> processCategory.add(transaction.getCategory());
+        transactionService.processTransactions(user, consumer);
+        assertEquals(3, processCategory.size());
+        assertTrue(processCategory.contains("Food"));
 
+        Set<String> process1 = new HashSet<>();
+        Consumer<Transaction> consumer1 = transaction -> process1.add(transaction.getCategory());
+        transactionService.processTransactions(null, consumer1);
+        assertEquals(0, process1.size());
     }
 
     @Test
     void createTrasactionList() {
-
+        Supplier<List<Transaction>> supplier = () -> Arrays.asList(
+                new Transaction("001", new BigDecimal("100.0"), TransactionType.DEPOSIT, FOOD_CATEGORY, ONE_DAY_AGO),
+                new Transaction("002", new BigDecimal("200.0"), TransactionType.PAYMENT, EDUCATION_CATEGORY, FIVE_WEEKS_AGO),
+                new Transaction("003", new BigDecimal("500.0"), TransactionType.PAYMENT, BEAUTY_CATEGORY, TEN_DAYS_AGO));
+        List<Transaction> result = transactionService.createTrasactionList(supplier);
+        assertEquals(3, result.size());
     }
 
     @Test
     void mergeTransactionList() {
+        List<Transaction> list1 = new ArrayList<>();
+        List<Transaction> list2 = new ArrayList<>();
 
+        list1.add(new Transaction("1", new BigDecimal("1000.00"), TransactionType.DEPOSIT, FOOD_CATEGORY, ONE_MONTH_AGO));
+        list1.add(new Transaction("2", new BigDecimal("5000.0"), TransactionType.PAYMENT, EDUCATION_CATEGORY, ONE_DAY_AGO));
+
+        list2.add(new Transaction("3", new BigDecimal("500.00"), TransactionType.PAYMENT, BEAUTY_CATEGORY, FIVE_WEEKS_AGO));
+        list2.add(new Transaction("4", new BigDecimal("2000.00"), TransactionType.PAYMENT, EDUCATION_CATEGORY, THREE_DAYS_AGO));
+
+        BiFunction<List<Transaction>, List<Transaction>, List<Transaction>> mergeTransactions = (o1, o2) -> {
+            List<Transaction> mergedList = new ArrayList<>(o1);
+            mergedList.addAll(o2);
+            return mergedList;
+        };
+        List<Transaction> result = transactionService.mergeTransactionList(list1, list2, mergeTransactions);
+        assertEquals(4, result.size());
+
+        List<Transaction> result1 = transactionService.mergeTransactionList(list1, null, mergeTransactions);
+        assertEquals(0, result1.size());
     }
+
 }

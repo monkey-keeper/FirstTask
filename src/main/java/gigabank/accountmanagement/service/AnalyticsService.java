@@ -50,7 +50,7 @@ public class AnalyticsService {
      */
     public Map<String, BigDecimal> getMonthlySpendingByCategories(User user, Set<String> categories){
         Map<String, BigDecimal> result = new HashMap<>();
-        Set<String> validCategories = TRANSACTION_SERVICE.validateCategories(categories);
+        Set<String> validCategories = TRANSACTION_SERVICE.validateCategory(categories);
         if (user == null || validCategories.isEmpty())
             return result;
 
@@ -135,9 +135,9 @@ public class AnalyticsService {
                 .filter(transaction -> TransactionType.PAYMENT.equals(transaction.getType()))
                 .filter(transaction -> transaction.getCreatedDate().isAfter(ONE_MONTH))
                 .filter(transaction -> transaction.getValue().compareTo(new BigDecimal("10.00")) > 0)
-                .sorted(Comparator.comparing(Transaction::getValue))
-                .sorted(Comparator.comparing(Transaction::getCreatedDate))
-                .sorted(Comparator.comparing(Transaction::getCategory))
+                .sorted(Comparator.comparing(Transaction::getValue)
+                        .thenComparing(Transaction::getCreatedDate)
+                        .thenComparing(Transaction::getCategory))
                 .toList();
         long endTime = System.nanoTime();
 
@@ -148,9 +148,9 @@ public class AnalyticsService {
                 .filter(transaction -> TransactionType.PAYMENT.equals(transaction.getType()))
                 .filter(transaction -> transaction.getCreatedDate().isAfter(ONE_MONTH))
                 .filter(transaction -> transaction.getValue().compareTo(new BigDecimal("10.00")) > 0)
-                .sorted(Comparator.comparing(Transaction::getValue))
-                .sorted(Comparator.comparing(Transaction::getCreatedDate))
-                .sorted(Comparator.comparing(Transaction::getCategory))
+                .sorted(Comparator.comparing(Transaction::getValue)
+                        .thenComparing(Transaction::getCreatedDate)
+                        .thenComparing(Transaction::getCategory))
                 .toList();
         endTime = System.nanoTime();
 

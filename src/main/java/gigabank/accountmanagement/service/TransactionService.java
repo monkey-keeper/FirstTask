@@ -23,13 +23,8 @@ public class TransactionService {
         return category != null && transactionCategories.contains(category);
     }
 
-    public Set<String> validateCategories (Set<String> categories) {
-        Set<String> result = new HashSet<>();
-        for (String category : categories) {
-            if (isValidCategories(category))
-                result.add(category);
-        }
-        return result;
+    public Set<String> validateCategory(Set<String> categories) {
+        return categories.stream().filter(this::isValidCategories).collect(Collectors.toSet());
     }
 
     /**

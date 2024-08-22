@@ -73,6 +73,7 @@ public class TransactionService {
         user.getBankAccounts().stream()
                 .flatMap(bankAccount -> bankAccount.getTransactions().stream())
                 .forEach(consumer);
+
     }
 
     /**

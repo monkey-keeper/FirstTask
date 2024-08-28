@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
  */
 public class TransactionService {
 
-    //почему здесь Set, а не List?
     public static Set<String> transactionCategories = Set.of(
             "Health", "Beauty", "Education");
 

@@ -11,4 +11,5 @@ import java.util.Map;
  */
 public class BankAccountService {
     private Map<User, List<BankAccount>> userAccounts;
+
 }

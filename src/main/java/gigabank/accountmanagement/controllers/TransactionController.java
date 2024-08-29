@@ -1,8 +1,8 @@
 package gigabank.accountmanagement.controllers;
 
-import gigabank.accountmanagement.dao.TransactionDAO;
-import gigabank.accountmanagement.dao.UserDAO;
+import gigabank.accountmanagement.dto.TransactionDTO;
 import gigabank.accountmanagement.entity.Transaction;
+import gigabank.accountmanagement.mapper.TransactionMapper;
 import gigabank.accountmanagement.service.TransactionService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -15,52 +15,44 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/transaction")
 public class TransactionController {
-    private final TransactionDAO transactionDAO;
     private final TransactionService transactionService;
-    private final UserDAO userDAO;
 
 
     @GetMapping()
-    public List<Transaction> getAllTransactions() {
-        return transactionDAO.getTransactions();
+    public List<TransactionDTO> getAllTransactions() {
+        return transactionService.findAll();
     }
 
     @GetMapping("/{id}")
-    public Transaction getTransactionById(@PathVariable String id) {
-        return transactionDAO.getTransactionById(id);
+    public TransactionDTO getTransactionById(@PathVariable String id) {
+        return transactionService.findById(id);
     }
 
     // как спринг будет различать id от category?
     @GetMapping("/{category}")
-    public List<Transaction> getTransactionByCategory(@PathVariable String category) {
-        Predicate<Transaction> predicate = transaction -> transaction.getCategory().equals(category);
-        return userDAO.findAll().stream()
-                .flatMap(user -> transactionService.filterTransactions(user, predicate).stream())
-                .collect(Collectors.toList());
+    public List<TransactionDTO> getTransactionByCategory(@PathVariable String category) {
+        return transactionService.getTransactionByCategory(category);
     }
 
     // как спринг будет различать id от category и от type?
     @GetMapping("/{type}")
-    public List<Transaction> getTransactionByType(@PathVariable String type) {
-        Predicate<Transaction> predicate = transaction -> transaction.getType().toString().equals(type);
-        return userDAO.findAll().stream()
-                .flatMap(user -> transactionService.filterTransactions(user, predicate).stream())
-                .collect(Collectors.toList());
+    public List<TransactionDTO> getTransactionByType(@PathVariable String type) {
+        return transactionService.getTransactionByType(type);
     }
 
     @PostMapping()
     public void createTransaction(@RequestBody Transaction transaction) {
-        transactionDAO.createTransaction(transaction);
+        transactionService.create(TransactionMapper.convertToDTO(transaction));
     }
 
     @PostMapping("/{id}")
     public void updateTransaction(@PathVariable String id, @RequestBody Transaction transaction) {
-        transactionDAO.updateTransaction(id, transaction);
+        transactionService.update(id, TransactionMapper.convertToDTO(transaction));
     }
 
     @DeleteMapping("/{id}")
     public void deleteTransaction(@PathVariable String id) {
-        transactionDAO.deleteTransaction(id);
+        transactionService.delete(id);
     }
 
 

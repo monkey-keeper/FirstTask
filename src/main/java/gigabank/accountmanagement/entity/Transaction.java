@@ -1,6 +1,7 @@
 package gigabank.accountmanagement.entity;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
  * Информация о совершенной банковской транзакции
  */
 @Data
+@NoArgsConstructor
 public class Transaction {
     private String id;
     private BigDecimal value;

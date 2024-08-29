@@ -1,10 +1,15 @@
 package gigabank.accountmanagement.service;
 
+import gigabank.accountmanagement.dao.TransactionDAO;
+import gigabank.accountmanagement.dao.UserDAO;
+import gigabank.accountmanagement.dto.TransactionDTO;
 import gigabank.accountmanagement.entity.Transaction;
 import gigabank.accountmanagement.entity.User;
+import gigabank.accountmanagement.mapper.TransactionMapper;
+import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.*;
@@ -13,12 +18,55 @@ import java.util.stream.Collectors;
 /**
  * Сервис отвечает за управление платежами и переводами
  */
+@Service
+@AllArgsConstructor
 public class TransactionService {
+    private final TransactionDAO transactionDAO;
+    private final UserDAO userDAO;
+
+
+    public List<TransactionDTO> findAll() {
+        return transactionDAO.getTransactions().stream()
+                .map(TransactionMapper::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public TransactionDTO findById(String id) {
+        return TransactionMapper.convertToDTO(transactionDAO.getTransactionById(id));
+    }
+
+    public void create(TransactionDTO transactionDTO) {
+        transactionDAO.createTransaction(TransactionMapper.convertToEntity(transactionDTO));
+    }
+
+    public void update(String id, TransactionDTO transactionDTO) {
+        transactionDAO.updateTransaction(id, TransactionMapper.convertToEntity(transactionDTO));
+    }
+
+    public void delete(String id) {
+        transactionDAO.deleteTransaction(id);
+    }
+
+    public List<TransactionDTO> getTransactionByCategory(String category) {
+        Predicate<Transaction> predicate = transaction -> transaction.getCategory().equals(category);
+        return userDAO.findAll().stream()
+                .flatMap(user -> filterTransactions(user, predicate).stream())
+                .map(TransactionMapper::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public List<TransactionDTO> getTransactionByType(String type) {
+        Predicate<Transaction> predicate = transaction -> transaction.getType().toString().equals(type);
+        return userDAO.findAll().stream()
+                .flatMap(user -> filterTransactions(user, predicate).stream())
+                .map(TransactionMapper::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
     public static Set<String> transactionCategories = Set.of(
             "Health", "Beauty", "Education");
 
-    public boolean isValidCategories(String category){
+    public boolean isValidCategories(String category) {
         return category != null && transactionCategories.contains(category);
     }
 

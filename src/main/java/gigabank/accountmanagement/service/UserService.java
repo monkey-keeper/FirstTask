@@ -2,34 +2,32 @@ package gigabank.accountmanagement.service;
 
 import gigabank.accountmanagement.dao.UserDAO;
 import gigabank.accountmanagement.dto.UserDTO;
+import gigabank.accountmanagement.entity.User;
 import gigabank.accountmanagement.mapper.UserMapper;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
 public class UserService {
     private final UserDAO userDAO;
 
-    public List<UserDTO> findAll() {
-        return userDAO.findAll().stream()
-                .map(UserMapper::convertToDTO)
-                .collect(Collectors.toList());
+    public List<User> findAll() {
+        return userDAO.findAll();
     }
 
-    public UserDTO findById(String id) {
-        return UserMapper.convertToDTO(userDAO.findById(id));
+    public User findById(String id) {
+        return userDAO.findById(id);
     }
 
-    public void create(UserDTO userDTO) {
-        userDAO.save(UserMapper.convertToEntity(userDTO));
+    public void create(User user) {
+        userDAO.save(user);
     }
 
-    public void update(String id, UserDTO userDTO) {
-        userDAO.save(UserMapper.convertToEntity(userDTO));
+    public void update(String id, User user) {
+        userDAO.save(user);
     }
 
     public void delete(String id) {

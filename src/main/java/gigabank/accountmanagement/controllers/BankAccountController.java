@@ -1,13 +1,10 @@
 package gigabank.accountmanagement.controllers;
 
-import gigabank.accountmanagement.dao.BankAccountDAO;
 import gigabank.accountmanagement.dto.BankAccountDTO;
-import gigabank.accountmanagement.entity.BankAccount;
+import gigabank.accountmanagement.mapper.BankAccountMapper;
 import gigabank.accountmanagement.service.BankAccountService;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -18,27 +15,30 @@ public class BankAccountController {
 
     @GetMapping()
     public List<BankAccountDTO> getAllBankAccounts() {
-        return bankAccountService.getBankAccounts();
+        return bankAccountService.getBankAccounts().stream()
+                .map(BankAccountMapper::convertToDTO)
+                .toList();
     }
 
     @GetMapping("/{id}")
     public BankAccountDTO getBankAccountById(@PathVariable String id) {
-        return bankAccountService.getBankAccount(id);
+        return BankAccountMapper.convertToDTO(bankAccountService.getBankAccount(id));
     }
 
     @PostMapping()
     public void createBankAccount(@RequestBody BankAccountDTO bankAccountDTO) {
-        bankAccountService.createBankAccount(bankAccountDTO);
+        bankAccountService.createBankAccount(BankAccountMapper.convertToEntity(bankAccountDTO));
     }
 
     @PostMapping("/{id}")
     public void updateBankAccount(@PathVariable String id, @RequestBody BankAccountDTO bankAccountDTO) {
-        bankAccountService.updateBankAccount(id, bankAccountDTO);
+        bankAccountService.updateBankAccount(id, BankAccountMapper.convertToEntity(bankAccountDTO));
     }
 
     @DeleteMapping("/{id}")
     public void deleteBankAccount(@PathVariable String id) {
         bankAccountService.deleteBankAccount(id);
     }
+
 
 }

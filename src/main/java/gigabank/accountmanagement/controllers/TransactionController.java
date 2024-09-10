@@ -1,15 +1,12 @@
 package gigabank.accountmanagement.controllers;
 
 import gigabank.accountmanagement.dto.TransactionDTO;
-import gigabank.accountmanagement.entity.Transaction;
 import gigabank.accountmanagement.mapper.TransactionMapper;
 import gigabank.accountmanagement.service.TransactionService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 @RestController
@@ -20,42 +17,50 @@ public class TransactionController {
 
     @GetMapping()
     public List<TransactionDTO> getAllTransactions() {
-        return transactionService.findAll();
+        return transactionService.findAll().stream()
+                .map(TransactionMapper::convertToDTO)
+                .toList();
     }
 
     @GetMapping("/{id}")
     public TransactionDTO getTransactionById(@PathVariable String id) {
-        return transactionService.findById(id);
+        return TransactionMapper.convertToDTO(transactionService.findById(id));
     }
 
-    // как спринг будет различать id от category?
-    @GetMapping("/{category}")
-    public List<TransactionDTO> getTransactionByCategory(@PathVariable String category) {
-        return transactionService.getTransactionByCategory(category);
-    }
-
-    // как спринг будет различать id от category и от type?
-    @GetMapping("/{type}")
-    public List<TransactionDTO> getTransactionByType(@PathVariable String type) {
-        return transactionService.getTransactionByType(type);
+    @GetMapping("/search")
+    public List<TransactionDTO> searchTransactions(@RequestParam(required = false) String category,
+                                                   @RequestParam(required = false) String type) {
+        if (category == null && type == null) {
+            return getAllTransactions();
+        } else if (category != null && type != null) {
+            return transactionService.getTransactionByCategoryAndType(category, type).stream()
+                    .map(TransactionMapper::convertToDTO)
+                    .toList();
+        } else if (category != null) {
+            return transactionService.getTransactionByCategory(category).stream()
+                    .map(TransactionMapper::convertToDTO)
+                    .toList();
+        } else {
+            return transactionService.getTransactionByType(type).stream()
+                    .map(TransactionMapper::convertToDTO)
+                    .toList();
+        }
     }
 
     @PostMapping()
-    public void createTransaction(@RequestBody Transaction transaction) {
-        transactionService.create(TransactionMapper.convertToDTO(transaction));
+    public void createTransaction(@RequestBody TransactionDTO transactionDTO) {
+        transactionService.create(TransactionMapper.convertToEntity(transactionDTO));
     }
 
     @PostMapping("/{id}")
-    public void updateTransaction(@PathVariable String id, @RequestBody Transaction transaction) {
-        transactionService.update(id, TransactionMapper.convertToDTO(transaction));
+    public void updateTransaction(@PathVariable String id, @RequestBody TransactionDTO transactionDTO) {
+        transactionService.update(id, TransactionMapper.convertToEntity(transactionDTO));
     }
 
     @DeleteMapping("/{id}")
     public void deleteTransaction(@PathVariable String id) {
         transactionService.delete(id);
     }
-
-
 
 
 }

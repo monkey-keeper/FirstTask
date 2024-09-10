@@ -1,15 +1,11 @@
 package gigabank.accountmanagement.service;
 
 import gigabank.accountmanagement.dao.BankAccountDAO;
-import gigabank.accountmanagement.dto.BankAccountDTO;
-import gigabank.accountmanagement.entity.User;
-import gigabank.accountmanagement.mapper.BankAccountMapper;
+import gigabank.accountmanagement.entity.BankAccount;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Сервис отвечает за управление счетами, включая создание, удаление и пополнение
@@ -22,22 +18,20 @@ public class BankAccountService {
     private final BankAccountDAO accountDAO;
 
 
-    public List<BankAccountDTO> getBankAccounts() {
-        return accountDAO.getBankAccounts().stream()
-                .map(BankAccountMapper::convertToDTO)
-                .collect(Collectors.toList());
+    public List<BankAccount> getBankAccounts() {
+        return accountDAO.getBankAccounts();
     }
 
-    public BankAccountDTO getBankAccount(String id) {
-        return BankAccountMapper.convertToDTO(accountDAO.getBankAccount(id));
+    public BankAccount getBankAccount(String id) {
+        return accountDAO.getBankAccount(id);
     }
 
-    public void createBankAccount(BankAccountDTO bankAccountDTO) {
-        accountDAO.AddBankAccount(BankAccountMapper.convertToEntity(bankAccountDTO));
+    public void createBankAccount(BankAccount bankAccount) {
+        accountDAO.AddBankAccount(bankAccount);
     }
 
-    public void updateBankAccount(String id, BankAccountDTO bankAccountDTO) {
-        accountDAO.UpdateBankAccount(id, BankAccountMapper.convertToEntity(bankAccountDTO));
+    public void updateBankAccount(String id, BankAccount bankAccount) {
+        accountDAO.UpdateBankAccount(id, bankAccount);
     }
 
     public void deleteBankAccount(String id) {

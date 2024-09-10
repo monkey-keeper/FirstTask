@@ -2,8 +2,6 @@ package gigabank.accountmanagement.dao;
 
 import gigabank.accountmanagement.entity.BankAccount;
 import org.springframework.stereotype.Component;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Component

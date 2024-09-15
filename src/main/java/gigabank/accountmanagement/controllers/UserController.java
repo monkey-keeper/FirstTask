@@ -1,11 +1,9 @@
 package gigabank.accountmanagement.controllers;
 
 import gigabank.accountmanagement.dto.UserDTO;
-import gigabank.accountmanagement.entity.User;
 import gigabank.accountmanagement.mapper.UserMapper;
 import gigabank.accountmanagement.service.UserService;
 import lombok.AllArgsConstructor;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,23 +17,23 @@ public class UserController {
     @GetMapping()
     public List<UserDTO> getAllUsers() {
         return userService.findAll().stream()
-                .map(UserMapper::convertToDTO)
+                .map(UserMapper::toDTO)
                 .toList();
     }
 
     @GetMapping("/{id}")
     public UserDTO getUserById(@PathVariable String id) {
-        return UserMapper.convertToDTO(userService.findById(id));
+        return UserMapper.toDTO(userService.findById(id));
     }
 
     @PostMapping()
-    public void createUser(@RequestBody UserDTO userDTO) {
-        userService.create(UserMapper.convertToEntity(userDTO));
+    public UserDTO createUser(@RequestBody UserDTO userDTO) {
+        return UserMapper.toDTO(userService.create(UserMapper.fromDTO(userDTO)));
     }
 
     @PostMapping("/{id}")
-    public void updateUser(@PathVariable String id, @RequestBody UserDTO userDTO) {
-        userService.update(id, UserMapper.convertToEntity(userDTO));
+    public UserDTO updateUser(@PathVariable String id, @RequestBody UserDTO userDTO) {
+        return UserMapper.toDTO(userService.update(id, UserMapper.fromDTO(userDTO)));
     }
 
     @DeleteMapping("/{id}")

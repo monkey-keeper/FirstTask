@@ -4,6 +4,8 @@ import gigabank.accountmanagement.dao.UserDAO;
 import gigabank.accountmanagement.dto.UserDTO;
 import gigabank.accountmanagement.entity.User;
 import gigabank.accountmanagement.mapper.UserMapper;
+import gigabank.accountmanagement.repository.UserRepository;
+import gigabank.accountmanagement.repository.UserRepositoryImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,26 +14,27 @@ import java.util.List;
 @Service
 @AllArgsConstructor
 public class UserService {
-    private final UserDAO userDAO;
+    private final UserRepository userRepository = new UserRepositoryImpl();
 
     public List<User> findAll() {
-        return userDAO.findAll();
+        return userRepository.findAll();
     }
 
     public User findById(String id) {
-        return userDAO.findById(id);
+        return userRepository.findById(id);
     }
 
-    public void create(User user) {
-        userDAO.save(user);
+    public User create(User user) {
+        return userRepository.create(user);
     }
 
-    public void update(String id, User user) {
-        userDAO.save(user);
+    public User update(String id, User user) {
+        user.setId(id);
+        return userRepository.update(user);
     }
 
     public void delete(String id) {
-        userDAO.delete(id);
+        userRepository.delete(id);
     }
 
 }

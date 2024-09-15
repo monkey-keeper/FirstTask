@@ -5,8 +5,11 @@ import gigabank.accountmanagement.mapper.BankAccountMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 
+import java.sql.PreparedStatement;
 import java.util.List;
 
 @Repository
@@ -16,8 +19,16 @@ public class BankAccountRepositoryImpl implements BankAccountRepository {
     private JdbcTemplate jdbcTemplate;
 
     @Override
-    public BankAccount save(BankAccount bankAccount) {
-        jdbcTemplate.update("INSERT INTO bankAccount (balance) VALUES (?)", bankAccount.getBalance());
+    public BankAccount create(BankAccount bankAccount) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        String sql = "INSERT INTO bankAccount (balance) VALUES (?)";
+
+        jdbcTemplate.update(con -> {
+            PreparedStatement ps = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
+            ps.setBigDecimal(1, bankAccount.getBalance());
+            return ps;
+        }, keyHolder);
+        bankAccount.setId(keyHolder.getKey().toString());
         return bankAccount;
     }
 
@@ -35,14 +46,14 @@ public class BankAccountRepositoryImpl implements BankAccountRepository {
     }
 
     @Override
-    public BankAccount update(String id, BankAccount bankAccount) {
-        jdbcTemplate.update("UPDATE bankAccount SET balance=? WHERE id=?", bankAccount.getBalance(), id);
+    public BankAccount update(BankAccount bankAccount) {
+        jdbcTemplate.update("UPDATE bankAccount SET balance=? WHERE id=?", bankAccount.getBalance(), bankAccount.getId());
         return bankAccount;
     }
 
     @Override
-    public void delete(BankAccount bankAccount) {
-        jdbcTemplate.update("DELETE FROM bankAccount WHERE id=?", bankAccount.getId());
+    public void delete(String id) {
+        jdbcTemplate.update("DELETE FROM bankAccount WHERE id=?", id);
     }
 
 

@@ -2,7 +2,10 @@ package gigabank.accountmanagement.service;
 
 import gigabank.accountmanagement.dao.BankAccountDAO;
 import gigabank.accountmanagement.entity.BankAccount;
+import gigabank.accountmanagement.repository.BankAccountRepository;
+import gigabank.accountmanagement.repository.BankAccountRepositoryImpl;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,27 +18,29 @@ import java.util.List;
 public class BankAccountService {
     //  private Map<User, List<BankAccount>> userAccounts;
 
-    private final BankAccountDAO accountDAO;
+    @Autowired
+    private BankAccountRepository bankAccountRepository;
 
 
     public List<BankAccount> getBankAccounts() {
-        return accountDAO.getBankAccounts();
+        return bankAccountRepository.findAll();
     }
 
     public BankAccount getBankAccount(String id) {
-        return accountDAO.getBankAccount(id);
+        return bankAccountRepository.findById(id);
     }
 
-    public void createBankAccount(BankAccount bankAccount) {
-        accountDAO.AddBankAccount(bankAccount);
+    public BankAccount createBankAccount(BankAccount bankAccount) {
+        return bankAccountRepository.create(bankAccount);
     }
 
-    public void updateBankAccount(String id, BankAccount bankAccount) {
-        accountDAO.UpdateBankAccount(id, bankAccount);
+    public BankAccount updateBankAccount(String id, BankAccount bankAccount) {
+        bankAccount.setId(id);
+        return bankAccountRepository.update(bankAccount);
     }
 
     public void deleteBankAccount(String id) {
-        accountDAO.DeleteBankAccount(id);
+        bankAccountRepository.delete(id);
     }
 
 }

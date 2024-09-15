@@ -17,44 +17,32 @@ public class TransactionController {
 
     @GetMapping()
     public List<TransactionDTO> getAllTransactions() {
-        return transactionService.findAll().stream()
-                .map(TransactionMapper::convertToDTO)
+        return transactionService.findTransaction().stream()
+                .map(TransactionMapper::toDTO)
                 .toList();
     }
 
     @GetMapping("/{id}")
     public TransactionDTO getTransactionById(@PathVariable String id) {
-        return TransactionMapper.convertToDTO(transactionService.findById(id));
+        return TransactionMapper.toDTO(transactionService.findById(id));
     }
 
     @GetMapping("/search")
     public List<TransactionDTO> searchTransactions(@RequestParam(required = false) String category,
                                                    @RequestParam(required = false) String type) {
-        if (category == null && type == null) {
-            return getAllTransactions();
-        } else if (category != null && type != null) {
-            return transactionService.getTransactionByCategoryAndType(category, type).stream()
-                    .map(TransactionMapper::convertToDTO)
-                    .toList();
-        } else if (category != null) {
-            return transactionService.getTransactionByCategory(category).stream()
-                    .map(TransactionMapper::convertToDTO)
-                    .toList();
-        } else {
-            return transactionService.getTransactionByType(type).stream()
-                    .map(TransactionMapper::convertToDTO)
-                    .toList();
-        }
+        return transactionService.findTransaction(category, type).stream()
+                .map(TransactionMapper::toDTO)
+                .toList();
     }
 
     @PostMapping()
-    public void createTransaction(@RequestBody TransactionDTO transactionDTO) {
-        transactionService.create(TransactionMapper.convertToEntity(transactionDTO));
+    public TransactionDTO createTransaction(@RequestBody TransactionDTO transactionDTO) {
+        return TransactionMapper.toDTO(transactionService.create(TransactionMapper.fromDTO(transactionDTO)));
     }
 
     @PostMapping("/{id}")
-    public void updateTransaction(@PathVariable String id, @RequestBody TransactionDTO transactionDTO) {
-        transactionService.update(id, TransactionMapper.convertToEntity(transactionDTO));
+    public TransactionDTO updateTransaction(@PathVariable String id, @RequestBody TransactionDTO transactionDTO) {
+        return TransactionMapper.toDTO(transactionService.update(id, TransactionMapper.fromDTO(transactionDTO)));
     }
 
     @DeleteMapping("/{id}")

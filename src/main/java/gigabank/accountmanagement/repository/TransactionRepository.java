@@ -8,7 +8,8 @@ import java.util.List;
 public interface TransactionRepository {
     Transaction create(Transaction transaction, BankAccount account);
     Transaction findById(String id);
-    Transaction update(String id, Transaction transaction);
+    Transaction update(Transaction transaction);
     void delete(String id);
     List<Transaction> findAll();
+    List<Transaction> findByCategoryAndType(String category, String type);
 }

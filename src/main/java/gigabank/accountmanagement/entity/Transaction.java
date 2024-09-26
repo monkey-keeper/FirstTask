@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 public class Transaction {
-    private String id;
+    private String id; //TODO: to Long
     private BigDecimal value;
     private TransactionType type;
     private String category;

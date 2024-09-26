@@ -21,7 +21,7 @@ public class BankAccountController {
     }
 
     @GetMapping("/{id}")
-    public BankAccountDTO getBankAccountById(@PathVariable String id) {
+    public BankAccountDTO getBankAccountById(@PathVariable("id") String id) {
         return BankAccountMapper.toDTO(bankAccountService.getBankAccount(id));
     }
 
@@ -31,12 +31,12 @@ public class BankAccountController {
     }
 
     @PostMapping("/{id}")
-    public BankAccountDTO updateBankAccount(@PathVariable String id, @RequestBody BankAccountDTO bankAccountDTO) {
+    public BankAccountDTO updateBankAccount(@PathVariable("id") String id, @RequestBody BankAccountDTO bankAccountDTO) {
         return BankAccountMapper.toDTO(bankAccountService.updateBankAccount(id, BankAccountMapper.fromDTO(bankAccountDTO)));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBankAccount(@PathVariable String id) {
+    public void deleteBankAccount(@PathVariable("id") String id) {
         bankAccountService.deleteBankAccount(id);
     }
 

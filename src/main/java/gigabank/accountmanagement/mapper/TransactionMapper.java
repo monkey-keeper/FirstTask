@@ -10,6 +10,7 @@ public class TransactionMapper {
         transactionDTO.setValue(transaction.getValue());
         transactionDTO.setType(transaction.getType());
         transactionDTO.setCategory(transaction.getCategory());
+        transactionDTO.setBankAccount(BankAccountMapper.toDTO(transaction.getBankAccount()));
         return transactionDTO;
     }
 
@@ -19,6 +20,7 @@ public class TransactionMapper {
         transaction.setValue(transactionDTO.getValue());
         transaction.setType(transactionDTO.getType());
         transaction.setCategory(transactionDTO.getCategory());
+        transaction.setBankAccount(BankAccountMapper.fromDTO(transactionDTO.getBankAccount()));
         return transaction;
     }
 }

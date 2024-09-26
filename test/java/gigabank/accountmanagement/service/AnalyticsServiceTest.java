@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,7 +31,7 @@ class AnalyticsServiceTest {
 
     private TransactionService transactionService = new TransactionService();
     private AnalyticsService analyticsService = new AnalyticsService(transactionService);
-    private User user = new User();
+    private User user = new User(rs.getString("user_id"), rs.getString("firstName"), rs.getString("middleName"), rs.getString("lastName"), birthDate.toLocalDate());
     private BankAccount bankAccount1;
     private BankAccount bankAccount2;
     private BankAccount bankAccount3;
@@ -99,14 +98,14 @@ class AnalyticsServiceTest {
         // ??? assertEquals(TWENTY_DOLLARS, result.get(FOOD_CATEGORY));
 
         // Нет транзакций за последний месяц, принадлежащих указанным категориям.
-        User testUser = new User();
+        User testUser = new User(rs.getString("user_id"), rs.getString("firstName"), rs.getString("middleName"), rs.getString("lastName"), birthDate.toLocalDate());
         testUser.getBankAccounts().add(bankAccount1);
         Map<String, BigDecimal> result1 = analyticsService.getMonthlySpendingByCategories(testUser
                 , Set.of(FOOD_CATEGORY, EDUCATION_CATEGORY));
         assertNull(result1.get(FOOD_CATEGORY));
 
         // Нет транзакций типа PAYMENT.
-        User noPaymentUser = new User();
+        User noPaymentUser = new User(rs.getString("user_id"), rs.getString("firstName"), rs.getString("middleName"), rs.getString("lastName"), birthDate.toLocalDate());
         noPaymentUser.getBankAccounts().add(bankAccount4);
         Map<String, BigDecimal> result2 = analyticsService.getMonthlySpendingByCategories(noPaymentUser
                 , Set.of(BEAUTY_CATEGORY, FOOD_CATEGORY));
@@ -127,7 +126,7 @@ class AnalyticsServiceTest {
         assertEquals(TEN_DOLLARS, result.get(BEAUTY_CATEGORY).get(0).getValue());
 
         // Нет транзакций типа PAYMENT.
-        User noPayment = new User();
+        User noPayment = new User(rs.getString("user_id"), rs.getString("firstName"), rs.getString("middleName"), rs.getString("lastName"), birthDate.toLocalDate());
         noPayment.getBankAccounts().add(bankAccount4);
         LinkedHashMap<String, List<Transaction>> result1 = analyticsService.getTransactionHistorySortedByAmount(noPayment);
         assertNull(result1.get(FOOD_CATEGORY));
@@ -155,7 +154,7 @@ class AnalyticsServiceTest {
         assertEquals("2", result1.get(3).getId());
 
         // Нет транзакций.
-        List<Transaction> result2 = analyticsService.getLastNTransaction(new User(),4);
+        List<Transaction> result2 = analyticsService.getLastNTransaction(new User(rs.getString("user_id"), rs.getString("firstName"), rs.getString("middleName"), rs.getString("lastName"), birthDate.toLocalDate()),4);
         assertEquals(0, result2.size());
 
         // Пользователь равен null.
@@ -179,7 +178,7 @@ class AnalyticsServiceTest {
         assertEquals(4, result1.size());
 
         // Нет транзакций типа PAYMENT.
-        User noPaymentUser = new User();
+        User noPaymentUser = new User(rs.getString("user_id"), rs.getString("firstName"), rs.getString("middleName"), rs.getString("lastName"), birthDate.toLocalDate());
         noPaymentUser.getBankAccounts().add(bankAccount4);
         PriorityQueue<Transaction> result2  = analyticsService.getTopNLargestTransactions(noPaymentUser, 5);
         assertEquals(0, result2.size());

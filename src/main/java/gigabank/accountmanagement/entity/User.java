@@ -1,6 +1,7 @@
 package gigabank.accountmanagement.entity;
 
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -16,5 +17,5 @@ public class User {
     private String middleName;
     private String lastName;
     private LocalDate birthDate;
-    private List<BankAccount> bankAccounts = new ArrayList<>();
+    private List<BankAccount> bankAccounts;
 }

@@ -23,7 +23,7 @@ public class TransactionController {
     }
 
     @GetMapping("/{id}")
-    public TransactionDTO getTransactionById(@PathVariable String id) {
+    public TransactionDTO getTransactionById(@PathVariable("id") String id) {
         return TransactionMapper.toDTO(transactionService.findById(id));
     }
 

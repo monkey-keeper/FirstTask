@@ -40,7 +40,7 @@ class TransactionServiceTest {
     @BeforeEach
     public void setUp() {
         transactionService = new TransactionService();
-        user = new User();
+        user = new User(rs.getString("user_id"), rs.getString("firstName"), rs.getString("middleName"), rs.getString("lastName"), birthDate.toLocalDate());
         bankAccount1 = new BankAccount();
         bankAccount2 = new BankAccount();
         bankAccount3 = new BankAccount();

@@ -4,8 +4,8 @@ import gigabank.accountmanagement.entity.BankAccount;
 import gigabank.accountmanagement.entity.Transaction;
 import gigabank.accountmanagement.entity.User;
 import gigabank.accountmanagement.entity.TransactionType;
+import gigabank.accountmanagement.mapper.TransactionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -51,36 +51,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 "JOIN bankAccount b ON t.bankAccount_id = b.id " +
                 "JOIN user_bankaccount ub ON b.id = ub.bankaccount_id " +
                 "JOIN useraccount u ON u.id = ub.user_id WHERE t.id = ?";
-        return jdbcTemplate.queryForObject(sql, new Object[]{id}, (rs, rowNum) -> {
-                    LocalDate birthDate = rs.getTimestamp("birthdate").toInstant()
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate();
-
-                    // Создаём объект UserAccount
-                    User user = new User();
-                    user.setId(rs.getString("user_id"));
-                    user.setFirstName(rs.getString("firstname"));
-                    user.setMiddleName(rs.getString("middlename"));
-                    user.setLastName(rs.getString("lastname"));
-                    user.setBirthDate(birthDate);
-
-                    // Создаём объект BankAccount
-                    BankAccount bankAccount = new BankAccount();
-                    bankAccount.setId(rs.getString("bankaccount_id"));
-                    bankAccount.setBalance(rs.getBigDecimal("balance"));
-                    bankAccount.setOwner(user);
-
-                    // Создаём объект Transaction
-                    Transaction transaction = new Transaction();
-                    transaction.setId(rs.getString("transaction_id"));
-                    transaction.setValue(rs.getBigDecimal("value"));
-                    transaction.setType(TransactionType.valueOf(rs.getString("type")));
-                    transaction.setCategory(rs.getString("category"));
-                    transaction.setCreatedDate(rs.getTimestamp("createDate").toLocalDateTime());
-                    transaction.setBankAccount(bankAccount);
-
-                    return transaction;
-                });
+        return jdbcTemplate.queryForObject(sql, new Object[]{id}, TransactionMapper::mapRow);
     }
 
     @Override
@@ -97,101 +68,14 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         if (type != null) {
             sql.append(" WHERE type=?");
             if (category == null) {
-                return jdbcTemplate.query(sql.toString(),  new Object[]{type}, (rs, rowNum) -> {
-                    LocalDate birthDate = rs.getTimestamp("birthdate").toInstant()
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate();
-
-                    // Создаём объект UserAccount
-                    User user = new User();
-                    user.setId(rs.getString("user_id"));
-                    user.setFirstName(rs.getString("firstname"));
-                    user.setMiddleName(rs.getString("middlename"));
-                    user.setLastName(rs.getString("lastname"));
-                    user.setBirthDate(birthDate);
-
-                    // Создаём объект BankAccount
-                    BankAccount bankAccount = new BankAccount();
-                    bankAccount.setId(rs.getString("bankaccount_id"));
-                    bankAccount.setBalance(rs.getBigDecimal("balance"));
-                    bankAccount.setOwner(user);
-
-                    // Создаём объект Transaction
-                    Transaction transaction = new Transaction();
-                    transaction.setId(rs.getString("transaction_id"));
-                    transaction.setValue(rs.getBigDecimal("value"));
-                    transaction.setType(TransactionType.valueOf(rs.getString("type")));
-                    transaction.setCategory(rs.getString("category"));
-                    transaction.setCreatedDate(rs.getTimestamp("createDate").toLocalDateTime());
-                    transaction.setBankAccount(bankAccount);
-
-                    return transaction;
-                });
+                return jdbcTemplate.query(sql.toString(),  new Object[]{type}, TransactionMapper::mapRow);
             } else {
                 sql.append(" AND category=?");
-                return jdbcTemplate.query(sql.toString(),  new Object[]{type, category}, (rs, rowNum) -> {
-                    LocalDate birthDate = rs.getTimestamp("birthdate").toInstant()
-                            .atZone(ZoneId.systemDefault())
-                            .toLocalDate();
-
-                    // Создаём объект UserAccount
-                    User user = new User();
-                    user.setId(rs.getString("user_id"));
-                    user.setFirstName(rs.getString("firstname"));
-                    user.setMiddleName(rs.getString("middlename"));
-                    user.setLastName(rs.getString("lastname"));
-                    user.setBirthDate(birthDate);
-
-                    // Создаём объект BankAccount
-                    BankAccount bankAccount = new BankAccount();
-                    bankAccount.setId(rs.getString("bankaccount_id"));
-                    bankAccount.setBalance(rs.getBigDecimal("balance"));
-                    bankAccount.setOwner(user);
-
-                    // Создаём объект Transaction
-                    Transaction transaction = new Transaction();
-                    transaction.setId(rs.getString("transaction_id"));
-                    transaction.setValue(rs.getBigDecimal("value"));
-                    transaction.setType(TransactionType.valueOf(rs.getString("type")));
-                    transaction.setCategory(rs.getString("category"));
-                    transaction.setCreatedDate(rs.getTimestamp("createDate").toLocalDateTime());
-                    transaction.setBankAccount(bankAccount);
-
-                    return transaction;
-                });
+                return jdbcTemplate.query(sql.toString(),  new Object[]{type, category}, TransactionMapper::mapRow);
             }
         } else {
             sql.append(" WHERE category=?");
-            return jdbcTemplate.query(sql.toString(), new Object[]{category}, (rs, rowNum) -> {
-                LocalDate birthDate = rs.getTimestamp("birthdate").toInstant()
-                        .atZone(ZoneId.systemDefault())
-                        .toLocalDate();
-
-                // Создаём объект UserAccount
-                User user = new User();
-                user.setId(rs.getString("user_id"));
-                user.setFirstName(rs.getString("firstname"));
-                user.setMiddleName(rs.getString("middlename"));
-                user.setLastName(rs.getString("lastname"));
-                user.setBirthDate(birthDate);
-
-                // Создаём объект BankAccount
-                BankAccount bankAccount = new BankAccount();
-                bankAccount.setId(rs.getString("bankaccount_id"));
-                bankAccount.setBalance(rs.getBigDecimal("balance"));
-                bankAccount.setOwner(user);
-
-                // Создаём объект Transaction
-                Transaction transaction = new Transaction();
-                transaction.setId(rs.getString("transaction_id"));
-                transaction.setValue(rs.getBigDecimal("value"));
-                transaction.setType(TransactionType.valueOf(rs.getString("type")));
-                transaction.setCategory(rs.getString("category"));
-                transaction.setCreatedDate(rs.getTimestamp("createDate").toLocalDateTime());
-                transaction.setBankAccount(bankAccount);
-
-                return transaction;
-            });
+            return jdbcTemplate.query(sql.toString(), new Object[]{category}, TransactionMapper::mapRow);
         }
     }
 

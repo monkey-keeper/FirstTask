@@ -1,5 +1,6 @@
 package gigabank.accountmanagement.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Transaction {
     private String id; //TODO: to Long
     private BigDecimal value;
@@ -19,11 +21,4 @@ public class Transaction {
     private BankAccount bankAccount;
     private LocalDateTime createdDate;
 
-    public Transaction(String id, BigDecimal value, TransactionType type, String category,  LocalDateTime createdDate) {
-        this.id = id;
-        this.value = value;
-        this.type = type;
-        this.category = category;
-        this.createdDate = createdDate;
-    }
 }

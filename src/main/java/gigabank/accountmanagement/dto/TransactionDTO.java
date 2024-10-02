@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
@@ -15,4 +16,5 @@ public class TransactionDTO {
     private BigDecimal value;
     private TransactionType type;
     private String category;
+    private BankAccountDTO bankAccount;
 }

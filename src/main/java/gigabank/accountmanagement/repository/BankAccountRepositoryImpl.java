@@ -30,14 +30,14 @@ public class BankAccountRepositoryImpl implements BankAccountRepository {
             ps.setBigDecimal(1, bankAccount.getBalance());
             return ps;
         }, keyHolder);
-        bankAccount.setId(keyHolder.getKeys().get("id").toString());
+        bankAccount.setId((Long) keyHolder.getKeys().get("id"));
 
         String sqlUserBankAccount = "INSERT INTO user_bankAccount (user_Id, bankAccount_Id) VALUES (?, ?)";
 
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sqlUserBankAccount);
-            ps.setLong(1, Long.parseLong(bankAccount.getOwner().getId()));
-            ps.setLong(2, Long.parseLong(bankAccount.getId()));
+            ps.setLong(1, bankAccount.getOwner().getId());
+            ps.setLong(2, bankAccount.getId());
             return ps;
         });
 
@@ -47,7 +47,7 @@ public class BankAccountRepositoryImpl implements BankAccountRepository {
     @Override
     public BankAccount findById(BigInteger id) {
         String sql = "SELECT ba.id AS bank_account_id, ba.balance, ua.id AS user_id, ua.firstName, " +
-                "ua.middleName, ua.lastName, ua.birthdate FROM bankaccount ba JOIN user_bankaccount uba ON ba.id = uba.bankaccount_id " +
+                "ua.middleName, ua.lastName, ua.birthdate, ua.phonenumber FROM bankaccount ba JOIN user_bankaccount uba ON ba.id = uba.bankaccount_id " +
                 "JOIN useraccount ua ON ua.id = uba.user_id WHERE ba.id = ?";
 
         return jdbcTemplate.queryForObject(sql, new Object[]{id}, BankAccountMapper::mapRow);
@@ -67,7 +67,7 @@ public class BankAccountRepositoryImpl implements BankAccountRepository {
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setBigDecimal(1, bankAccount.getBalance());
-            ps.setLong(2, Long.parseLong(bankAccount.getId()));
+            ps.setLong(2, bankAccount.getId());
             return ps;
         });
 
@@ -76,8 +76,8 @@ public class BankAccountRepositoryImpl implements BankAccountRepository {
             String updateOwnerSQL = "UPDATE user_bankaccount SET user_id = ? WHERE bankaccount_id = ?";
             jdbcTemplate.update(con -> {
                 PreparedStatement ps = con.prepareStatement(updateOwnerSQL);
-                ps.setLong(1, Long.parseLong(owner.getId()));
-                ps.setLong(2, Long.parseLong(bankAccount.getId()));
+                ps.setLong(1, owner.getId());
+                ps.setLong(2, bankAccount.getId());
                 return ps;
             });
         }
@@ -87,6 +87,7 @@ public class BankAccountRepositoryImpl implements BankAccountRepository {
 
     @Override
     public void delete(BigInteger id) {
+        jdbcTemplate.update("DELETE FROM user_bankaccount WHERE bankaccount_id=?", id);
         jdbcTemplate.update("DELETE FROM bankAccount WHERE id=?", id);
     }
 

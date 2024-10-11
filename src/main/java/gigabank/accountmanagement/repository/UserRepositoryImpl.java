@@ -33,7 +33,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public User create(User user) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        String sql = "INSERT INTO userAccount (firstName, middleName, lastname, birthdate) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO userAccount (firstName, middleName, lastname, birthdate, phoneNumber) VALUES (?, ?, ?, ?, ?)";
 
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS);
@@ -42,15 +42,16 @@ public class UserRepositoryImpl implements UserRepository {
             ps.setString(3, user.getLastName());
             ZonedDateTime zonedDateTime = user.getBirthDate().atStartOfDay(ZoneId.systemDefault());
             ps.setTimestamp(4, Timestamp.from(zonedDateTime.toInstant()));
+            ps.setString(5, user.getPhoneNumber());
             return ps;
         }, keyHolder);
-        user.setId(keyHolder.getKeys().get("id").toString());
+        user.setId((Long) keyHolder.getKeys().get("id"));
         return user;
     }
 
     @Override
     public User update(User user) {
-        String sql = "UPDATE userAccount SET firstName=?, middleName=?, lastName=?, birthdate=? WHERE id=?";
+        String sql = "UPDATE userAccount SET firstName=?, middleName=?, lastName=?, birthdate=?, phoneNumber=? WHERE id=?";
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql);
             ps.setString(1, user.getFirstName());
@@ -58,7 +59,8 @@ public class UserRepositoryImpl implements UserRepository {
             ps.setString(3, user.getLastName());
             ZonedDateTime zonedDateTime = user.getBirthDate().atStartOfDay(ZoneId.systemDefault());
             ps.setTimestamp(4, Timestamp.from(zonedDateTime.toInstant()));
-            ps.setLong (5, Long.parseLong(user.getId()));
+            ps.setString(5, user.getPhoneNumber());
+            ps.setLong (6, user.getId());
             return ps;
         });
         return user;

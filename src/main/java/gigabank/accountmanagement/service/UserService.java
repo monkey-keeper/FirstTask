@@ -2,7 +2,6 @@ package gigabank.accountmanagement.service;
 
 import gigabank.accountmanagement.entity.User;
 import gigabank.accountmanagement.repository.UserRepository;
-import gigabank.accountmanagement.repository.UserRepositoryImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,21 +17,21 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User findById(String id) {
-        return userRepository.findById(BigInteger.valueOf(Long.parseLong(id)));
+    public User findById(Long id) {
+        return userRepository.findById(BigInteger.valueOf(id));
     }
 
     public User create(User user) {
         return userRepository.create(user);
     }
 
-    public User update(String id, User user) {
+    public User update(Long id, User user) {
         user.setId(id);
         return userRepository.update(user);
     }
 
-    public void delete(String id) {
-        userRepository.delete(BigInteger.valueOf(Long.parseLong(id)));
+    public void delete(Long id) {
+        userRepository.delete(BigInteger.valueOf(id));
     }
 
 }

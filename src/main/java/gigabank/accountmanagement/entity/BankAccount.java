@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BankAccount {
-    private String id;
+    private Long id;
     private BigDecimal balance;
     private User owner;
     private List<Transaction> transactions;

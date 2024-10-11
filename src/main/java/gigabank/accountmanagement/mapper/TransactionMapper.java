@@ -39,7 +39,7 @@ public class TransactionMapper {
 
         // Создаём объект UserAccount
         User user = new User();
-        user.setId(rs.getString("user_id"));
+        user.setId(rs.getLong("user_id"));
         user.setFirstName(rs.getString("firstname"));
         user.setMiddleName(rs.getString("middlename"));
         user.setLastName(rs.getString("lastname"));
@@ -47,13 +47,13 @@ public class TransactionMapper {
 
         // Создаём объект BankAccount
         BankAccount bankAccount = new BankAccount();
-        bankAccount.setId(rs.getString("bankaccount_id"));
+        bankAccount.setId(rs.getLong("bankaccount_id"));
         bankAccount.setBalance(rs.getBigDecimal("balance"));
         bankAccount.setOwner(user);
 
         // Создаём объект Transaction
         Transaction transaction = new Transaction();
-        transaction.setId(rs.getString("transaction_id"));
+        transaction.setId(rs.getLong("transaction_id"));
         transaction.setValue(rs.getBigDecimal("value"));
         transaction.setType(TransactionType.valueOf(rs.getString("type")));
         transaction.setCategory(rs.getString("category"));

@@ -27,7 +27,7 @@ public class TransactionServiceTest {
 
     @Test
     public void createTransactionTest() {
-        Transaction transaction = new Transaction("", new BigDecimal(10.0), TransactionType.PAYMENT, "",
+        Transaction transaction = new Transaction(1L, new BigDecimal(10.0), TransactionType.PAYMENT, "",
                 bankAccountService.getBankAccount("6"), LocalDateTime.now());
         Transaction newTransaction = transactionService.create(transaction);
         assertEquals(transaction.getValue(), newTransaction.getValue());
@@ -45,7 +45,7 @@ public class TransactionServiceTest {
 
     @Test
     public void findByIdTransactionTest() {
-        assertNotNull(transactionService.findById("4"));
+        assertNotNull(transactionService.findById(1L));
     }
 
     @Test
@@ -55,9 +55,9 @@ public class TransactionServiceTest {
 
     @Test
     public void updateTransactionTest() {
-        Transaction transaction = new Transaction("", new BigDecimal(100.0), TransactionType.PAYMENT,
-                "CREATE", bankAccountService.getBankAccount("6"), LocalDateTime.now());
-        Transaction newTransaction = transactionService.update("4", transaction);
+        Transaction transaction = new Transaction(1L, new BigDecimal(100.0), TransactionType.PAYMENT,
+                "CREATE", bankAccountService.getBankAccount(""), LocalDateTime.now());
+        Transaction newTransaction = transactionService.update(1L, transaction);
         assertEquals(transaction.getValue(), newTransaction.getValue());
         assertEquals(transaction.getType(), newTransaction.getType());
         assertEquals(transaction.getCategory(), newTransaction.getCategory());
@@ -67,8 +67,8 @@ public class TransactionServiceTest {
 
     @Test
     public void deleteTransactionTest() {
-        transactionService.delete("4");
-        assertNull(transactionService.findById("4"));
+        transactionService.delete(1L);
+        assertNull(transactionService.findById(1L));
     }
 
 }

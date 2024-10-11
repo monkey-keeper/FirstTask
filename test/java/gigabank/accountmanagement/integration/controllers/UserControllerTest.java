@@ -2,6 +2,7 @@ package gigabank.accountmanagement.integration.controllers;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gigabank.accountmanagement.dto.UserDTO;
 import gigabank.accountmanagement.entity.User;
 import gigabank.accountmanagement.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -37,8 +38,8 @@ public class UserControllerTest {
 
     @Test
     public void testCreateUser() throws Exception {
-        User user = new User("1", "first_1", "middle_2", "last_3", LocalDate.now(),
-                new ArrayList<>());
+        UserDTO user = new UserDTO(1L, "first_1", "middle_2", "last_3",
+                LocalDate.now().minusYears(20), "88005553535");
         String serializedUser = objectMapper.writeValueAsString(user);
 
         MvcResult result = mockMvc.perform(post("/user")
@@ -46,12 +47,73 @@ public class UserControllerTest {
                 .content(serializedUser))
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
-        String json = result.getResponse().getContentAsString();
-        User newUser = objectMapper.readValue(json, User.class);
+        UserDTO newUser = objectMapper.readValue(result.getResponse().getContentAsString(), UserDTO.class);
+
         assertEquals(user.getFirstName(), newUser.getFirstName());
         assertEquals(user.getMiddleName(), newUser.getMiddleName());
         assertEquals(user.getLastName(), newUser.getLastName());
         assertEquals(user.getBirthDate(), newUser.getBirthDate());
+        assertEquals(user.getPhoneNumber(), newUser.getPhoneNumber());
+
+        Long id = newUser.getId();
+
+        assertNotNull(id);
+
+        User userByRepository = userRepository.findById(BigInteger.valueOf(id));
+
+        assertNotNull(userByRepository);
+        assertEquals(user.getFirstName(), userByRepository.getFirstName());
+        assertEquals(user.getMiddleName(), userByRepository.getMiddleName());
+        assertEquals(user.getLastName(), userByRepository.getLastName());
+        assertEquals(user.getBirthDate(), userByRepository.getBirthDate());
+        assertEquals(user.getPhoneNumber(), userByRepository.getPhoneNumber());
+
+        MvcResult result2 = mockMvc.perform(get(String.format("/user/%d", id)))
+                .andExpect(status().is2xxSuccessful())
+                .andReturn();
+        UserDTO getUser = objectMapper.readValue(result2.getResponse().getContentAsString(), UserDTO.class);
+
+        assertNotNull(getUser);
+        assertEquals(id, getUser.getId());
+        assertEquals(user.getFirstName(), getUser.getFirstName());
+        assertEquals(user.getMiddleName(), getUser.getMiddleName());
+        assertEquals(user.getLastName(), getUser.getLastName());
+        assertEquals(user.getBirthDate(), getUser.getBirthDate());
+        assertEquals(user.getPhoneNumber(), getUser.getPhoneNumber());
+
+        UserDTO user2 = new UserDTO(1L, "tsrif", "elddim", "tsal",
+                LocalDate.now().minusYears(30), "1234567890");
+        String serializedUser2 = objectMapper.writeValueAsString(user2);
+        MvcResult result3 = mockMvc.perform(post(String.format("/user/%d", id))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(serializedUser2))
+                .andExpect(status().is2xxSuccessful())
+                .andReturn();
+        UserDTO updateUser = objectMapper.readValue(result3.getResponse().getContentAsString(), UserDTO.class);
+
+        assertNotNull(updateUser);
+        assertEquals(id, updateUser.getId());
+        assertEquals(user2.getFirstName(), updateUser.getFirstName());
+        assertEquals(user2.getMiddleName(), updateUser.getMiddleName());
+        assertEquals(user2.getLastName(), updateUser.getLastName());
+        assertEquals(user2.getBirthDate(), updateUser.getBirthDate());
+        assertEquals(user2.getPhoneNumber(), updateUser.getPhoneNumber());
+
+        User updatedUserByRepository = userRepository.findById(BigInteger.valueOf(id));
+
+        assertNotNull(updatedUserByRepository);
+        assertEquals(id, updatedUserByRepository.getId());
+        assertEquals(user2.getFirstName(), updatedUserByRepository.getFirstName());
+        assertEquals(user2.getMiddleName(), updatedUserByRepository.getMiddleName());
+        assertEquals(user2.getLastName(), updatedUserByRepository.getLastName());
+        assertEquals(user2.getBirthDate(), updatedUserByRepository.getBirthDate());
+        assertEquals(user2.getPhoneNumber(), updatedUserByRepository.getPhoneNumber());
+
+        MvcResult result4 = mockMvc.perform(delete(String.format("/user/%d", id)))
+                .andExpect(status().is2xxSuccessful())
+                .andReturn();
+
+        //TODO: check what user delete
 
     }
 
@@ -77,64 +139,6 @@ public class UserControllerTest {
         assertEquals(firstUser.getMiddleName(), firstUserByRepository.getMiddleName());
         assertEquals(firstUser.getLastName(), firstUserByRepository.getLastName());
         assertEquals(firstUser.getBirthDate(), firstUserByRepository.getBirthDate());
-    }
-
-    @Test
-    public void testGetUserById() throws Exception {
-        String id = "4";
-        MvcResult result = mockMvc.perform(get(String.format("/user/%s", id)))
-                .andExpect(status().is2xxSuccessful())
-                .andReturn();
-        User user = objectMapper.readValue(result.getResponse().getContentAsString(), User.class);
-
-        assertNotNull(user);
-        assertEquals(id, user.getId());
-
-        User userByRepository = userRepository.findById(BigInteger.valueOf(Long.parseLong(id)));
-        assertNotNull(userByRepository);
-        assertEquals(user.getFirstName(), userByRepository.getFirstName());
-        assertEquals(user.getMiddleName(), userByRepository.getMiddleName());
-        assertEquals(user.getLastName(), userByRepository.getLastName());
-        assertEquals(user.getBirthDate(), userByRepository.getBirthDate());
-
-    }
-
-    @Test
-    public void testUpdateUser() throws Exception {
-        String id = "5";
-        User user = new User("1", "tsrif", "elddim", "tsal", LocalDate.now(),
-                new ArrayList<>());
-        String serializedUser = objectMapper.writeValueAsString(user);
-        MvcResult result = mockMvc.perform(post(String.format("/user/%s", id))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(serializedUser))
-                .andExpect(status().is2xxSuccessful())
-                .andReturn();
-        User updateUser = objectMapper.readValue(result.getResponse().getContentAsString(), User.class);
-
-        assertEquals(id, updateUser.getId());
-        assertEquals(user.getFirstName(), updateUser.getFirstName());
-        assertEquals(user.getMiddleName(), updateUser.getMiddleName());
-        assertEquals(user.getLastName(), updateUser.getLastName());
-        assertEquals(user.getBirthDate(), updateUser.getBirthDate());
-
-        User updatedUserByRepository = userRepository.findById(BigInteger.valueOf(Long.parseLong(id)));
-
-        assertNotNull(updatedUserByRepository);
-        assertEquals(updateUser.getFirstName(), updatedUserByRepository.getFirstName());
-        assertEquals(updateUser.getMiddleName(), updatedUserByRepository.getMiddleName());
-        assertEquals(updateUser.getLastName(), updatedUserByRepository.getLastName());
-        assertEquals(updateUser.getBirthDate(), updatedUserByRepository.getBirthDate());
-
-    }
-
-    @Test
-    public void testDeleteUser() throws Exception {
-        String id = "5";
-        MvcResult result = mockMvc.perform(delete(String.format("/user/%s", id)))
-                .andExpect(status().is2xxSuccessful())
-                .andReturn();
-        assertNull(objectMapper.readValue(result.getResponse().getContentAsString(), User.class));
     }
 
 

@@ -22,8 +22,8 @@ import java.util.stream.Collectors;
 public class TransactionService {
     private final TransactionRepository transactionRepository;
 
-    public Transaction findById(String id) {
-        return transactionRepository.findById(BigInteger.valueOf(Long.parseLong(id)));
+    public Transaction findById(Long id) {
+        return transactionRepository.findById(BigInteger.valueOf(id));
     }
 
     public Transaction create(Transaction transaction) {
@@ -31,14 +31,14 @@ public class TransactionService {
         return transactionRepository.create(transaction);
     }
 
-    public Transaction update(String id, Transaction transaction) {
+    public Transaction update(Long id, Transaction transaction) {
         transaction.setId(id);
         transactionRepository.update(transaction);
         return transaction;
     }
 
-    public void delete(String id) {
-        transactionRepository.delete(BigInteger.valueOf(Long.parseLong(id)));
+    public void delete(Long id) {
+        transactionRepository.delete(BigInteger.valueOf(id));
     }
 
     public List<Transaction> findTransaction() {

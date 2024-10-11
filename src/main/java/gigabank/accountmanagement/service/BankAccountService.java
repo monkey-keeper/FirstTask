@@ -33,7 +33,7 @@ public class BankAccountService {
         return bankAccountRepository.create(bankAccount);
     }
 
-    public BankAccount updateBankAccount(String id, BankAccount bankAccount) {
+    public BankAccount updateBankAccount(Long id, BankAccount bankAccount) {
         bankAccount.setId(id);
         return bankAccountRepository.update(bankAccount);
     }

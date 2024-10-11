@@ -25,9 +25,9 @@ public class BankAccountServiceTest {
 
     @Test
     public void createBankAccountTest() {
-        User user = new User("1", "first", "middle", "last", LocalDate.now(), new ArrayList<>());
+        User user = new User(1L, "first", "middle", "last", LocalDate.now(), new ArrayList<>(), "");
         User newUser = userService.create(user);
-        BankAccount bankAccount = new BankAccount("1", new BigDecimal(1234.123),
+        BankAccount bankAccount = new BankAccount(1L, new BigDecimal(1234.123),
                 newUser, new ArrayList<>());
         BankAccount newBankAccount = bankAccountService.createBankAccount(bankAccount);
         assertEquals(bankAccount.getBalance(), newBankAccount.getBalance());
@@ -46,8 +46,8 @@ public class BankAccountServiceTest {
 
     @Test
     public void updateBankAccountTest() {
-        BankAccount newBankAccount = new BankAccount("1", new BigDecimal(1.00), userService.findById("2"), new ArrayList<>());
-        BankAccount updateBankAccount = bankAccountService.updateBankAccount("6", newBankAccount);
+        BankAccount newBankAccount = new BankAccount(1L, new BigDecimal(1.00), userService.findById(1L), new ArrayList<>());
+        BankAccount updateBankAccount = bankAccountService.updateBankAccount(1L, newBankAccount);
         assertEquals(updateBankAccount.getBalance(), newBankAccount.getBalance());
         assertEquals(updateBankAccount.getOwner().getId(), newBankAccount.getOwner().getId());
     }

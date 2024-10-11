@@ -16,10 +16,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
-    private String id;
+    private Long id;
     private String firstName;
     private String middleName;
     private String lastName;
     private LocalDate birthDate;
     private List<BankAccount> bankAccounts;
+    private String phoneNumber;
 }

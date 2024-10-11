@@ -11,6 +11,7 @@ public class UserMapper {
         userDTO.setMiddleName(user.getMiddleName());
         userDTO.setLastName(user.getLastName());
         userDTO.setBirthDate(user.getBirthDate());
+        userDTO.setPhoneNumber(user.getPhoneNumber());
         return userDTO;
     }
 
@@ -21,6 +22,7 @@ public class UserMapper {
         user.setMiddleName(userDTO.getMiddleName());
         user.setLastName(userDTO.getLastName());
         user.setBirthDate(userDTO.getBirthDate());
+        user.setPhoneNumber(userDTO.getPhoneNumber());
         return user;
     }
 }

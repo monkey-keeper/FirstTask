@@ -8,7 +8,8 @@ CREATE TABLE IF NOT EXISTS userAccount (
     firstName varchar(30) NOT NULL,
     middleName varchar(30) NOT NULL,
     lastName varchar(30) NOT NULL,
-    birthDate timestamp with time zone
+    birthDate timestamp with time zone,
+    phoneNumber varchar(30) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS transaction (

@@ -1,9 +1,6 @@
 package gigabank.accountmanagement.repository;
 
-import gigabank.accountmanagement.entity.BankAccount;
 import gigabank.accountmanagement.entity.Transaction;
-import gigabank.accountmanagement.entity.User;
-import gigabank.accountmanagement.entity.TransactionType;
 import gigabank.accountmanagement.mapper.TransactionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -14,8 +11,6 @@ import org.springframework.stereotype.Repository;
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.List;
 
 @Repository
@@ -36,10 +31,10 @@ public class TransactionRepositoryImpl implements TransactionRepository {
             ps.setString(2, String.valueOf(transaction.getType()));
             ps.setString(3, transaction.getCategory());
             ps.setTimestamp(4, Timestamp.valueOf(transaction.getCreatedDate()));
-            ps.setLong(5, Long.parseLong(transaction.getBankAccount().getId()));
+            ps.setLong(5, transaction.getBankAccount().getId());
             return ps;
         }, keyHolder);
-        transaction.setId(keyHolder.getKeys().get("id").toString());
+        transaction.setId((Long) keyHolder.getKeys().get("id"));
         return transaction;
     }
 
@@ -88,8 +83,8 @@ public class TransactionRepositoryImpl implements TransactionRepository {
             ps.setBigDecimal(1, transaction.getValue());
             ps.setString(2, transaction.getType().name());
             ps.setString(3, transaction.getCategory());
-            ps.setLong(4, Long.parseLong(transaction.getBankAccount().getId()));
-            ps.setLong(5, Long.parseLong(transaction.getId()));
+            ps.setLong(4, transaction.getBankAccount().getId());
+            ps.setLong(5, transaction.getId());
             return ps;
         } );
 
@@ -110,37 +105,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 "JOIN user_bankaccount ub ON b.id = ub.bankaccount_id " +
                 "JOIN useraccount u ON u.id = ub.user_id";
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> {
-            LocalDate birthDate = rs.getTimestamp("birthdate").toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate();
-
-            // Создаём объект UserAccount
-            User user = new User();
-            user.setId(rs.getString("user_id"));
-            user.setFirstName(rs.getString("firstname"));
-            user.setMiddleName(rs.getString("middlename"));
-            user.setLastName(rs.getString("lastname"));
-            user.setBirthDate(birthDate);
-
-
-            // Создаём объект BankAccount
-            BankAccount bankAccount = new BankAccount();
-            bankAccount.setId(rs.getString("bankaccount_id"));
-            bankAccount.setBalance(rs.getBigDecimal("balance"));
-            bankAccount.setOwner(user);
-
-            // Создаём объект Transaction
-            Transaction transaction = new Transaction();
-            transaction.setId(rs.getString("transaction_id"));
-            transaction.setValue(rs.getBigDecimal("value"));
-            transaction.setType(TransactionType.valueOf(rs.getString("type")));
-            transaction.setCategory(rs.getString("category"));
-            transaction.setCreatedDate(rs.getTimestamp("createDate").toLocalDateTime());
-            transaction.setBankAccount(bankAccount);
-
-            return transaction;
-        });
+        return jdbcTemplate.query(sql, TransactionMapper::mapRow);
     }
 
 }

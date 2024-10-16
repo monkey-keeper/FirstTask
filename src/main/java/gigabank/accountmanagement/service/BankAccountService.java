@@ -1,13 +1,12 @@
 package gigabank.accountmanagement.service;
 
-import gigabank.accountmanagement.dao.BankAccountDAO;
 import gigabank.accountmanagement.entity.BankAccount;
 import gigabank.accountmanagement.repository.BankAccountRepository;
-import gigabank.accountmanagement.repository.BankAccountRepositoryImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -27,20 +26,20 @@ public class BankAccountService {
     }
 
     public BankAccount getBankAccount(String id) {
-        return bankAccountRepository.findById(id);
+        return bankAccountRepository.findById(BigInteger.valueOf(Long.parseLong(id)));
     }
 
     public BankAccount createBankAccount(BankAccount bankAccount) {
         return bankAccountRepository.create(bankAccount);
     }
 
-    public BankAccount updateBankAccount(String id, BankAccount bankAccount) {
+    public BankAccount updateBankAccount(Long id, BankAccount bankAccount) {
         bankAccount.setId(id);
         return bankAccountRepository.update(bankAccount);
     }
 
     public void deleteBankAccount(String id) {
-        bankAccountRepository.delete(id);
+        bankAccountRepository.delete(BigInteger.valueOf(Long.parseLong(id)));
     }
 
 }

@@ -1,15 +1,13 @@
 package gigabank.accountmanagement.service;
 
-import gigabank.accountmanagement.dao.TransactionDAO;
-import gigabank.accountmanagement.dao.UserDAO;
-import gigabank.accountmanagement.entity.BankAccount;
 import gigabank.accountmanagement.entity.Transaction;
 import gigabank.accountmanagement.entity.User;
 import gigabank.accountmanagement.repository.TransactionRepository;
-import gigabank.accountmanagement.repository.TransactionRepositoryImpl;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -22,28 +20,25 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class TransactionService {
-    private final TransactionRepository transactionRepository = new TransactionRepositoryImpl();
+    private final TransactionRepository transactionRepository;
 
-//    public List<Transaction> findAll() {
-//        return transactionRepository.findAll();
-//    }
-
-    public Transaction findById(String id) {
-        return transactionRepository.findById(id);
+    public Transaction findById(Long id) {
+        return transactionRepository.findById(BigInteger.valueOf(id));
     }
 
     public Transaction create(Transaction transaction) {
-        return transactionRepository.create(transaction, transaction.getBankAccount());
+        transaction.setCreatedDate(LocalDateTime.now());
+        return transactionRepository.create(transaction);
     }
 
-    public Transaction update(String id, Transaction transaction) {
+    public Transaction update(Long id, Transaction transaction) {
         transaction.setId(id);
         transactionRepository.update(transaction);
         return transaction;
     }
 
-    public void delete(String id) {
-        transactionRepository.delete(id);
+    public void delete(Long id) {
+        transactionRepository.delete(BigInteger.valueOf(id));
     }
 
     public List<Transaction> findTransaction() {
@@ -54,6 +49,9 @@ public class TransactionService {
         return transactionRepository.findByCategoryAndType(category, type);
     }
 
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static Set<String> transactionCategories = Set.of(
             "Health", "Beauty", "Education");

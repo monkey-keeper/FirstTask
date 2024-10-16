@@ -1,12 +1,13 @@
 package gigabank.accountmanagement.service;
 
-import gigabank.accountmanagement.dao.TransactionDAO;
-import gigabank.accountmanagement.dao.UserDAO;
 import gigabank.accountmanagement.entity.Transaction;
 import gigabank.accountmanagement.entity.User;
+import gigabank.accountmanagement.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -19,52 +20,38 @@ import java.util.stream.Collectors;
 @Service
 @AllArgsConstructor
 public class TransactionService {
-    private final TransactionDAO transactionDAO;
-    private final UserDAO userDAO;
+    private final TransactionRepository transactionRepository;
 
-
-    public List<Transaction> findAll() {
-        return transactionDAO.getTransactions();
+    public Transaction findById(Long id) {
+        return transactionRepository.findById(BigInteger.valueOf(id));
     }
 
-    public Transaction findById(String id) {
-        return transactionDAO.getTransactionById(id);
+    public Transaction create(Transaction transaction) {
+        transaction.setCreatedDate(LocalDateTime.now());
+        return transactionRepository.create(transaction);
     }
 
-    public void create(Transaction transaction) {
-        transactionDAO.createTransaction(transaction);
+    public Transaction update(Long id, Transaction transaction) {
+        transaction.setId(id);
+        transactionRepository.update(transaction);
+        return transaction;
     }
 
-    public void update(String id, Transaction transaction) {
-        transactionDAO.updateTransaction(id, transaction);
+    public void delete(Long id) {
+        transactionRepository.delete(BigInteger.valueOf(id));
     }
 
-    public void delete(String id) {
-        transactionDAO.deleteTransaction(id);
+    public List<Transaction> findTransaction() {
+        return transactionRepository.findAll();
     }
 
-    public List<Transaction> getTransactionByCategory(String category) {
-        Predicate<Transaction> predicate = transaction -> transaction.getCategory().equals(category);
-        return userDAO.findAll().stream()
-                .flatMap(user -> filterTransactions(user, predicate).stream())
-                .collect(Collectors.toList());
+    public List<Transaction> findTransaction(String category, String type) {
+        return transactionRepository.findByCategoryAndType(category, type);
     }
 
-    public List<Transaction> getTransactionByType(String type) {
-        Predicate<Transaction> predicate = transaction -> transaction.getType().toString().equals(type);
-        return userDAO.findAll().stream()
-                .flatMap(user -> filterTransactions(user, predicate).stream())
-                .collect(Collectors.toList());
-    }
 
-    public List<Transaction> getTransactionByCategoryAndType(String category, String type) {
-        Predicate<Transaction> predicateCategory = transaction -> transaction.getCategory().equals(category);
-        Predicate<Transaction> predicateType = transaction -> transaction.getType().toString().equals(type);
-        return transactionDAO.getTransactions().stream()
-                .filter(predicateType)
-                .filter(predicateCategory)
-                .toList();
-    }
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public static Set<String> transactionCategories = Set.of(
             "Health", "Beauty", "Education");

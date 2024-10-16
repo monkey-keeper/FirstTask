@@ -3,6 +3,7 @@ package gigabank.accountmanagement.controllers;
 import gigabank.accountmanagement.dto.BankAccountDTO;
 import gigabank.accountmanagement.mapper.BankAccountMapper;
 import gigabank.accountmanagement.service.BankAccountService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -16,29 +17,30 @@ public class BankAccountController {
     @GetMapping()
     public List<BankAccountDTO> getAllBankAccounts() {
         return bankAccountService.getBankAccounts().stream()
-                .map(BankAccountMapper::convertToDTO)
+                .map(BankAccountMapper::toDTO)
                 .toList();
     }
 
     @GetMapping("/{id}")
-    public BankAccountDTO getBankAccountById(@PathVariable String id) {
-        return BankAccountMapper.convertToDTO(bankAccountService.getBankAccount(id));
+    public BankAccountDTO getBankAccountById(@PathVariable("id") String id) {
+        return BankAccountMapper.toDTO(bankAccountService.getBankAccount(id));
     }
 
     @PostMapping()
-    public void createBankAccount(@RequestBody BankAccountDTO bankAccountDTO) {
-        bankAccountService.createBankAccount(BankAccountMapper.convertToEntity(bankAccountDTO));
+    public BankAccountDTO createBankAccount(@RequestBody @Valid BankAccountDTO bankAccountDTO) {
+        return BankAccountMapper.toDTO(bankAccountService.createBankAccount(BankAccountMapper.fromDTO(bankAccountDTO)));
     }
 
     @PostMapping("/{id}")
-    public void updateBankAccount(@PathVariable String id, @RequestBody BankAccountDTO bankAccountDTO) {
-        bankAccountService.updateBankAccount(id, BankAccountMapper.convertToEntity(bankAccountDTO));
+    public BankAccountDTO updateBankAccount(@PathVariable("id") Long id,
+                                            @RequestBody @Valid BankAccountDTO bankAccountDTO) {
+        return BankAccountMapper.toDTO(bankAccountService.updateBankAccount(id,
+                BankAccountMapper.fromDTO(bankAccountDTO)));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBankAccount(@PathVariable String id) {
+    public void deleteBankAccount(@PathVariable("id") String id) {
         bankAccountService.deleteBankAccount(id);
     }
-
 
 }

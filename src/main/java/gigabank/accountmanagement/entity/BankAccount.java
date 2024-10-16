@@ -1,5 +1,6 @@
 package gigabank.accountmanagement.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,10 +13,11 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class BankAccount {
-    private String id;
+    private Long id;
     private BigDecimal balance;
     private User owner;
-    private List<Transaction> transactions = new ArrayList<>();
+    private List<Transaction> transactions;
 
 }

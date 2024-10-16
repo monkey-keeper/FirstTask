@@ -1,6 +1,9 @@
 package gigabank.accountmanagement.repository;
 
+import gigabank.accountmanagement.entity.BankAccount;
 import gigabank.accountmanagement.entity.Transaction;
+import gigabank.accountmanagement.entity.TransactionType;
+import gigabank.accountmanagement.entity.User;
 import gigabank.accountmanagement.mapper.TransactionMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -10,7 +13,11 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Repository
@@ -46,7 +53,7 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 "JOIN bankAccount b ON t.bankAccount_id = b.id " +
                 "JOIN user_bankaccount ub ON b.id = ub.bankaccount_id " +
                 "JOIN useraccount u ON u.id = ub.user_id WHERE t.id = ?";
-        return jdbcTemplate.queryForObject(sql, new Object[]{id}, TransactionMapper::mapRow);
+        return jdbcTemplate.queryForObject(sql, new Object[]{id}, TransactionRepositoryImpl::mapRow);
     }
 
     @Override
@@ -63,14 +70,14 @@ public class TransactionRepositoryImpl implements TransactionRepository {
         if (type != null) {
             sql.append(" WHERE type=?");
             if (category == null) {
-                return jdbcTemplate.query(sql.toString(),  new Object[]{type}, TransactionMapper::mapRow);
+                return jdbcTemplate.query(sql.toString(),  new Object[]{type}, TransactionRepositoryImpl::mapRow);
             } else {
                 sql.append(" AND category=?");
-                return jdbcTemplate.query(sql.toString(),  new Object[]{type, category}, TransactionMapper::mapRow);
+                return jdbcTemplate.query(sql.toString(),  new Object[]{type, category}, TransactionRepositoryImpl::mapRow);
             }
         } else {
             sql.append(" WHERE category=?");
-            return jdbcTemplate.query(sql.toString(), new Object[]{category}, TransactionMapper::mapRow);
+            return jdbcTemplate.query(sql.toString(), new Object[]{category}, TransactionRepositoryImpl::mapRow);
         }
     }
 
@@ -105,7 +112,38 @@ public class TransactionRepositoryImpl implements TransactionRepository {
                 "JOIN user_bankaccount ub ON b.id = ub.bankaccount_id " +
                 "JOIN useraccount u ON u.id = ub.user_id";
 
-        return jdbcTemplate.query(sql, TransactionMapper::mapRow);
+        return jdbcTemplate.query(sql, TransactionRepositoryImpl::mapRow);
+    }
+
+    private static Transaction mapRow(ResultSet rs, int rowNum) throws SQLException {
+        LocalDate birthDate = rs.getTimestamp("birthdate").toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        // Создаём объект UserAccount
+        User user = new User();
+        user.setId(rs.getLong("user_id"));
+        user.setFirstName(rs.getString("firstname"));
+        user.setMiddleName(rs.getString("middlename"));
+        user.setLastName(rs.getString("lastname"));
+        user.setBirthDate(birthDate);
+
+        // Создаём объект BankAccount
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setId(rs.getLong("bankaccount_id"));
+        bankAccount.setBalance(rs.getBigDecimal("balance"));
+        bankAccount.setOwner(user);
+
+        // Создаём объект Transaction
+        Transaction transaction = new Transaction();
+        transaction.setId(rs.getLong("transaction_id"));
+        transaction.setValue(rs.getBigDecimal("value"));
+        transaction.setType(TransactionType.valueOf(rs.getString("type")));
+        transaction.setCategory(rs.getString("category"));
+        transaction.setCreatedDate(rs.getTimestamp("createDate").toLocalDateTime());
+        transaction.setBankAccount(bankAccount);
+
+        return transaction;
     }
 
 }

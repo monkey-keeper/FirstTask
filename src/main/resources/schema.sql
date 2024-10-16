@@ -25,3 +25,8 @@ CREATE TABLE IF NOT EXISTS user_bankAccount (
     user_id bigint REFERENCES userAccount(id),
     bankAccount_id bigint REFERENCES bankAccount(id)
 );
+
+CREATE TABLE IF NOT EXISTS test_entity (
+    id BIGINT generated always as identity PRIMARY KEY,
+    name VARCHAR(30)
+);

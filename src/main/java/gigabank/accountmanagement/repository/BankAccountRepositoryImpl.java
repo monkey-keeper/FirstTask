@@ -11,6 +11,10 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 
 import java.math.BigInteger;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 
 @Repository
@@ -50,15 +54,15 @@ public class BankAccountRepositoryImpl implements BankAccountRepository {
                 "ua.middleName, ua.lastName, ua.birthdate, ua.phonenumber FROM bankaccount ba JOIN user_bankaccount uba ON ba.id = uba.bankaccount_id " +
                 "JOIN useraccount ua ON ua.id = uba.user_id WHERE ba.id = ?";
 
-        return jdbcTemplate.queryForObject(sql, new Object[]{id}, BankAccountMapper::mapRow);
+        return jdbcTemplate.queryForObject(sql, new Object[]{id}, BankAccountRepositoryImpl::mapRow);
     }
 
     @Override
     public List<BankAccount> findAll() {
         String sql = "SELECT ba.id AS bank_account_id, ba.balance, ua.id AS user_id, ua.firstName, " +
-                "ua.middleName, ua.lastName, ua.birthdate FROM bankaccount ba JOIN user_bankaccount uba ON ba.id = uba.bankaccount_id " +
+                "ua.middleName, ua.lastName, ua.birthdate, ua.phonenumber FROM bankaccount ba JOIN user_bankaccount uba ON ba.id = uba.bankaccount_id " +
                 "JOIN useraccount ua ON ua.id = uba.user_id";
-        return jdbcTemplate.query(sql, BankAccountMapper::mapRow);
+        return jdbcTemplate.query(sql, BankAccountRepositoryImpl::mapRow);
     }
 
     @Override
@@ -91,5 +95,28 @@ public class BankAccountRepositoryImpl implements BankAccountRepository {
         jdbcTemplate.update("DELETE FROM bankAccount WHERE id=?", id);
     }
 
+    private static BankAccount mapRow(ResultSet rs, int rowNum) throws SQLException {
+        // Извлекаем дату рождения как LocalDate
+        LocalDate birthDate = rs.getTimestamp("birthdate").toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
+
+        // Создаём пользователя с датой рождения
+        User user = new User();
+        user.setId(rs.getLong("user_id"));
+        user.setFirstName(rs.getString("firstName"));
+        user.setMiddleName(rs.getString("middleName"));
+        user.setLastName(rs.getString("lastName"));
+        user.setBirthDate(birthDate);  // Передаём LocalDate
+        user.setPhoneNumber(rs.getString("phoneNumber"));
+
+        // Создаём банковский счёт
+        BankAccount bankAccount = new BankAccount();
+        bankAccount.setId(rs.getLong("bank_account_id"));
+        bankAccount.setBalance(rs.getBigDecimal("balance"));
+        bankAccount.setOwner(user);  // Связываем пользователя с банковским счётом
+
+        return bankAccount;
+    }
 
 }

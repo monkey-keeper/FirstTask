@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class BankAccountControllerTest {
     Long ownerId;
+    Long accountId;
 
     @Autowired
     private MockMvc mockMvc;
@@ -52,6 +53,10 @@ public class BankAccountControllerTest {
                 LocalDate.now().minusYears(20), new ArrayList<>(), "1234567890");
         User newUser = userRepository.create(user);
         ownerId = newUser.getId();
+        BankAccount bankAccount = new BankAccount(1L, new BigDecimal(12345.12345),
+                userRepository.findById(BigInteger.valueOf(ownerId)) , new ArrayList<>());
+        BankAccount newBankAccount = bankAccountRepository.create(bankAccount);
+        accountId = newBankAccount.getId();
     }
 
     @Test
@@ -132,11 +137,17 @@ public class BankAccountControllerTest {
                 new TypeReference<List<BankAccount>>() {});
         assertFalse(BankAccounts.isEmpty());
 
-        BankAccount bankAccount = BankAccounts.get(0);
+        BankAccount bankAccount = BankAccounts.stream()
+                .filter(ba -> ba.getId().equals(accountId))
+                .findFirst()
+                .orElse(null);
 
         assertNotNull(bankAccount.getId());
 
-        BankAccount bankAccountByRepository = bankAccountRepository.findAll().get(0);
+        BankAccount bankAccountByRepository = bankAccountRepository.findAll().stream()
+                .filter(ba -> ba.getId().equals(accountId))
+                .findFirst()
+                .orElse(null);
 
         assertEquals(bankAccount.getBalance(), bankAccountByRepository.getBalance());
         assertEquals(bankAccount.getOwner().getId(), bankAccountByRepository.getOwner().getId());
@@ -145,6 +156,7 @@ public class BankAccountControllerTest {
 
     @AfterEach
     public void tearDown() {
+        bankAccountRepository.delete(BigInteger.valueOf(accountId));
         userRepository.delete(BigInteger.valueOf(ownerId));
     }
 

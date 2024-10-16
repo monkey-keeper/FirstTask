@@ -32,35 +32,6 @@ public class TransactionMapper {
         return transaction;
     }
 
-    public static Transaction mapRow(ResultSet rs, int rowNum) throws SQLException {
-        LocalDate birthDate = rs.getTimestamp("birthdate").toInstant()
-                .atZone(ZoneId.systemDefault())
-                .toLocalDate();
 
-        // Создаём объект UserAccount
-        User user = new User();
-        user.setId(rs.getLong("user_id"));
-        user.setFirstName(rs.getString("firstname"));
-        user.setMiddleName(rs.getString("middlename"));
-        user.setLastName(rs.getString("lastname"));
-        user.setBirthDate(birthDate);
-
-        // Создаём объект BankAccount
-        BankAccount bankAccount = new BankAccount();
-        bankAccount.setId(rs.getLong("bankaccount_id"));
-        bankAccount.setBalance(rs.getBigDecimal("balance"));
-        bankAccount.setOwner(user);
-
-        // Создаём объект Transaction
-        Transaction transaction = new Transaction();
-        transaction.setId(rs.getLong("transaction_id"));
-        transaction.setValue(rs.getBigDecimal("value"));
-        transaction.setType(TransactionType.valueOf(rs.getString("type")));
-        transaction.setCategory(rs.getString("category"));
-        transaction.setCreatedDate(rs.getTimestamp("createDate").toLocalDateTime());
-        transaction.setBankAccount(bankAccount);
-
-        return transaction;
-    }
 
 }

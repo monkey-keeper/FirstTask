@@ -1,14 +1,13 @@
 package gigabank.accountmanagement.repository;
 
 import gigabank.accountmanagement.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.math.BigInteger;
 import java.util.List;
 
-public interface UserRepository {
-    List<User> findAll();
-    User create(User user);
-    User update(User user);
-    void delete(BigInteger id);
-    User findById(BigInteger id);
+@Repository
+public interface UserRepository extends JpaRepository<User, Long> {
+
 }

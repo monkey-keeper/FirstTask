@@ -25,21 +25,21 @@ public class BankAccountService {
         return bankAccountRepository.findAll();
     }
 
-    public BankAccount getBankAccount(String id) {
-        return bankAccountRepository.findById(BigInteger.valueOf(Long.parseLong(id)));
+    public BankAccount getBankAccount(Long id) {
+        return bankAccountRepository.findById(id).orElse(null);
     }
 
     public BankAccount createBankAccount(BankAccount bankAccount) {
-        return bankAccountRepository.create(bankAccount);
+        return bankAccountRepository.save(bankAccount);
     }
 
     public BankAccount updateBankAccount(Long id, BankAccount bankAccount) {
         bankAccount.setId(id);
-        return bankAccountRepository.update(bankAccount);
+        return bankAccountRepository.save(bankAccount);
     }
 
-    public void deleteBankAccount(String id) {
-        bankAccountRepository.delete(BigInteger.valueOf(Long.parseLong(id)));
+    public void deleteBankAccount(Long id) {
+        bankAccountRepository.deleteById(id);
     }
 
 }

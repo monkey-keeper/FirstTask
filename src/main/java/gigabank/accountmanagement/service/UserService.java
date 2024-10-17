@@ -18,20 +18,20 @@ public class UserService {
     }
 
     public User findById(Long id) {
-        return userRepository.findById(BigInteger.valueOf(id));
+        return userRepository.findById(id).orElse(null);
     }
 
     public User create(User user) {
-        return userRepository.create(user);
+        return userRepository.save(user);
     }
 
     public User update(Long id, User user) {
         user.setId(id);
-        return userRepository.update(user);
+        return userRepository.save(user);
     }
 
     public void delete(Long id) {
-        userRepository.delete(BigInteger.valueOf(id));
+        userRepository.deleteById(id);
     }
 
 }

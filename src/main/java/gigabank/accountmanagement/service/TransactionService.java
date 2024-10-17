@@ -1,6 +1,7 @@
 package gigabank.accountmanagement.service;
 
 import gigabank.accountmanagement.entity.Transaction;
+import gigabank.accountmanagement.entity.TransactionType;
 import gigabank.accountmanagement.entity.User;
 import gigabank.accountmanagement.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
@@ -23,22 +24,22 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
 
     public Transaction findById(Long id) {
-        return transactionRepository.findById(BigInteger.valueOf(id));
+        return transactionRepository.findById(id).orElse(null);
     }
 
     public Transaction create(Transaction transaction) {
         transaction.setCreatedDate(LocalDateTime.now());
-        return transactionRepository.create(transaction);
+        return transactionRepository.save(transaction);
     }
 
     public Transaction update(Long id, Transaction transaction) {
         transaction.setId(id);
-        transactionRepository.update(transaction);
+        transactionRepository.save(transaction);
         return transaction;
     }
 
     public void delete(Long id) {
-        transactionRepository.delete(BigInteger.valueOf(id));
+        transactionRepository.deleteById(id);
     }
 
     public List<Transaction> findTransaction() {
@@ -46,7 +47,11 @@ public class TransactionService {
     }
 
     public List<Transaction> findTransaction(String category, String type) {
-        return transactionRepository.findByCategoryAndType(category, type);
+        TransactionType transactionType = null;
+        if (type != null) {
+            transactionType = TransactionType.valueOf(type.toUpperCase());
+        }
+        return transactionRepository.findByCategoryAndType(category, transactionType);
     }
 
 

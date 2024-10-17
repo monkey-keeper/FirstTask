@@ -1,12 +1,11 @@
 package gigabank.accountmanagement.entity;
 
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,12 +14,17 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Entity(name = "user_account")
 public class User {
+    @Id
+    @GeneratedValue(strategy = jakarta.persistence.GenerationType.IDENTITY)
     private Long id;
     private String firstName;
     private String middleName;
     private String lastName;
     private LocalDate birthDate;
+
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL)
     private List<BankAccount> bankAccounts;
     private String phoneNumber;
 }

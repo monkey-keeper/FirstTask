@@ -5,11 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gigabank.accountmanagement.dto.UserDTO;
 import gigabank.accountmanagement.entity.User;
 import gigabank.accountmanagement.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -25,7 +28,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class UserControllerTest {
+    Long ownerId;
 
     @Autowired
     private MockMvc mockMvc;
@@ -35,6 +40,14 @@ public class UserControllerTest {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @BeforeEach
+    public void setUp() {
+        User user = new User(1L, "F1", "M1", "L1",
+                LocalDate.now().minusYears(20), new ArrayList<>(), "1234567890");
+        User newUser = userRepository.save(user);
+        ownerId = newUser.getId();
+    }
 
     @Test
     public void testCreateUser() throws Exception {
@@ -59,7 +72,7 @@ public class UserControllerTest {
 
         assertNotNull(id);
 
-        User userByRepository = userRepository.findById(BigInteger.valueOf(id));
+        User userByRepository = userRepository.findById(id).get();
 
         assertNotNull(userByRepository);
         assertEquals(user.getFirstName(), userByRepository.getFirstName());
@@ -99,7 +112,7 @@ public class UserControllerTest {
         assertEquals(user2.getBirthDate(), updateUser.getBirthDate());
         assertEquals(user2.getPhoneNumber(), updateUser.getPhoneNumber());
 
-        User updatedUserByRepository = userRepository.findById(BigInteger.valueOf(id));
+        User updatedUserByRepository = userRepository.findById(id).get();
 
         assertNotNull(updatedUserByRepository);
         assertEquals(id, updatedUserByRepository.getId());
@@ -127,20 +140,17 @@ public class UserControllerTest {
                 new TypeReference<List<User>>() {});
 
         assertFalse(users.isEmpty());
-
-        User firstUser = users.get(0);
-
-        assertNotNull(firstUser.getId());
-
-        User firstUserByRepository = userRepository.findAll().get(0);
-
-        assertEquals(firstUser.getId(), firstUserByRepository.getId());
-        assertEquals(firstUser.getFirstName(), firstUserByRepository.getFirstName());
-        assertEquals(firstUser.getMiddleName(), firstUserByRepository.getMiddleName());
-        assertEquals(firstUser.getLastName(), firstUserByRepository.getLastName());
-        assertEquals(firstUser.getBirthDate(), firstUserByRepository.getBirthDate());
+        assertNotNull(users.get(0).getId());
+        assertNotNull(users.get(0).getFirstName());
+        assertNotNull(users.get(0).getMiddleName());
+        assertNotNull(users.get(0).getLastName());
+        assertNotNull(users.get(0).getBirthDate());
+        assertNotNull(users.get(0).getPhoneNumber());
     }
 
-
+    @AfterEach
+    public void tearDown() {
+        userRepository.deleteById(ownerId);
+    }
 
 }

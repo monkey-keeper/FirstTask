@@ -22,7 +22,7 @@ public class BankAccountController {
     }
 
     @GetMapping("/{id}")
-    public BankAccountDTO getBankAccountById(@PathVariable("id") String id) {
+    public BankAccountDTO getBankAccountById(@PathVariable("id") Long id) {
         return BankAccountMapper.toDTO(bankAccountService.getBankAccount(id));
     }
 
@@ -39,7 +39,7 @@ public class BankAccountController {
     }
 
     @DeleteMapping("/{id}")
-    public void deleteBankAccount(@PathVariable("id") String id) {
+    public void deleteBankAccount(@PathVariable("id") Long id) {
         bankAccountService.deleteBankAccount(id);
     }
 

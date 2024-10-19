@@ -4,8 +4,15 @@ import gigabank.accountmanagement.entity.BankAccount;
 import gigabank.accountmanagement.entity.Transaction;
 import gigabank.accountmanagement.entity.TransactionType;
 import gigabank.accountmanagement.entity.User;
+import gigabank.accountmanagement.repository.BankAccountRepository;
+import gigabank.accountmanagement.repository.TransactionRepository;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,11 +22,47 @@ import java.util.stream.Collectors;
 /**
  * Сервис предоставляет аналитику по операциям пользователей
  */
-@RequiredArgsConstructor
+@Service
+@AllArgsConstructor
 public class AnalyticsService {
 
     private final TransactionService TRANSACTION_SERVICE;
     private final LocalDateTime ONE_MONTH = LocalDateTime.now().minusMonths(1L);
+
+    @Autowired
+    public BankAccountRepository bankAccountRepository;
+
+    @Autowired
+    public TransactionRepository transactionRepository;
+
+    public Transaction getLargestTransactionsFromBankAccount(Long accountId) {
+        return transactionRepository.findLargestTransactionByBankAccount(accountId);
+    }
+
+    public Transaction getSmallestTransactionsFromBankAccount(Long accountId) {
+        return transactionRepository.findSmallestTransactionByBankAccount(accountId);
+    }
+
+    public Transaction getAverageTransactionsFromBankAccount(Long accountId) {
+        return transactionRepository.findAverageTransactionByBankAccount(accountId);
+    }
+
+    public BigDecimal getSumOfTransactionsByCategoryFromBankAccount(String category, Long accountId) {
+        return transactionRepository.findSumTransactionByCategory(category, accountId);
+    }
+
+    public BigDecimal getSumOfTransactionsByDateRangeFromBankAccount(LocalDateTime startDate, LocalDateTime endDate,
+                                                                     Long bankAccountId) {
+        return transactionRepository.findSumByDateRange(startDate, endDate, bankAccountId);
+    }
+
+
+
+
+
+
+
+
     /**
      * Вывод суммы потраченных средств на категорию за последний месяц
      * @param bankAccount - счет

@@ -1,0 +1,28 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/gigabankDocker_DB
+      - SPRING_DATASOURCE_USERNAME=gigabank
+      - SPRING_DATASOURCE_PASSWORD=0000
+      - SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+    depends_on:
+      - db
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_DB: gigabankDocker_DB
+      POSTGRES_USER: gigabank
+      POSTGRES_PASSWORD: 0000
+    ports:
+      - "5444:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:

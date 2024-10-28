@@ -88,11 +88,6 @@
             <artifactId>spring-boot-starter</artifactId>
             <version>3.3.2</version>
         </dependency>
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-            <version>${spring.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -100,17 +95,7 @@
             <version>42.7.3</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-jdbc</artifactId>
-            <version>3.3.3</version>
-        </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jdbc</artifactId>
-            <version>3.3.3</version>
-        </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
         <dependency>
@@ -159,28 +144,37 @@
     </dependencies>
 
     <build>
-        <pluginManagement>
+
             <plugins>
-                <!-- Explicitly specify the version of the maven-resources-plugin -->
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.3.0</version>
-                </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>3.3.0</version>
                     <configuration>
-                        <compilerArgs>
-                            <arg>-parameters</arg>
-                        </compilerArgs>
+                        <descriptorRefs>
+                            <descriptorRef>jar-with-dependencies</descriptorRef>
+                        </descriptorRefs>
+                        <archive>
+                            <manifest>
+                                <mainClass>gigabank.accountmanagement.Application</mainClass>
+                            </manifest>
+                        </archive>
                     </configuration>
+                    <executions>
+                        <execution>
+                            <id>assemble-all</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
+
 
             </plugins>
-        </pluginManagement>
+
     </build>
 
 </project>

@@ -49,6 +49,12 @@ public class UserControllerTest {
         ownerId = newUser.getId();
     }
 
+    @AfterEach
+    public void tearDown() {
+        userRepository.deleteById(ownerId);
+    }
+
+
     @Test
     public void testCreateUser() throws Exception {
         UserDTO user = new UserDTO(1L, "first_1", "middle_2", "last_3",
@@ -148,9 +154,5 @@ public class UserControllerTest {
         assertNotNull(users.get(0).getPhoneNumber());
     }
 
-    @AfterEach
-    public void tearDown() {
-        userRepository.deleteById(ownerId);
-    }
 
 }

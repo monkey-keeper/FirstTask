@@ -42,6 +42,12 @@ public class TransactionControllerTest {
     Long t3Id;
     Long t4Id;
 
+    String type1 = TransactionType.DEPOSIT.name();
+    String type2 = TransactionType.PAYMENT.name();
+    String category1 = "Category1";
+    String category2 = "Category2";
+    String category3 = "Category3";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -87,6 +93,19 @@ public class TransactionControllerTest {
         t2Id = t2.getId();
         t3Id = t3.getId();
         t4Id = t4.getId();
+
+    }
+
+    @AfterEach
+    public void tearDown() {
+        transactionRepository.deleteById(t1Id);
+        transactionRepository.deleteById(t2Id);
+        transactionRepository.deleteById(t3Id);
+        transactionRepository.deleteById(t4Id);
+
+        bankAccountRepository.deleteById(accountId);
+
+        userRepository.deleteById(ownerId);
 
     }
 
@@ -138,13 +157,6 @@ public class TransactionControllerTest {
 
 
         //search test
-
-        String type1 = TransactionType.DEPOSIT.name();
-        String type2 = TransactionType.PAYMENT.name();
-        String category1 = "Category1";
-        String category2 = "Category2";
-        String category3 = "Category3";
-
         MvcResult firstResult = mockMvc.perform(get(String.format("/transaction/search?type=%s", type1)))
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
@@ -323,21 +335,6 @@ public class TransactionControllerTest {
                 TransactionType.valueOf(type));
 
         assertEquals(thirdTransactions.size(), thirdTransactionByRepository.size());
-
-    }
-
-    @AfterEach
-    public void tearDown() {
-        transactionRepository.deleteById(t1Id);
-        transactionRepository.deleteById(t2Id);
-        transactionRepository.deleteById(t3Id);
-        transactionRepository.deleteById(t4Id);
-
-        bankAccountRepository.deleteById(accountId);
-
-        userRepository.deleteById(ownerId);
-
-
 
     }
 

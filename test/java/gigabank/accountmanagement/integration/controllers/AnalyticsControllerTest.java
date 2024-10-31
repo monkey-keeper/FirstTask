@@ -84,6 +84,13 @@ public class AnalyticsControllerTest {
         t4Id = t4.getId();
     }
 
+    @BeforeEach
+    void tearDown() {
+        transactionRepository.deleteAll();
+        bankAccountRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @Test
     void getLargestTransactionFromBankAccount() throws Exception {
 
@@ -150,14 +157,6 @@ public class AnalyticsControllerTest {
         assertNotNull(getSumByDate);
         assertEquals(getSumByDate.compareTo(new BigDecimal("201")), 0);
 
-    }
-
-
-    @BeforeEach
-    void tearDown() {
-        transactionRepository.deleteAll();
-        bankAccountRepository.deleteAll();
-        userRepository.deleteAll();
     }
 
 }

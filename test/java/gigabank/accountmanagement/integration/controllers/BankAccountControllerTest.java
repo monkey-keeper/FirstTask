@@ -59,6 +59,12 @@ public class BankAccountControllerTest {
         accountId = newBankAccount.getId();
     }
 
+    @AfterEach
+    public void tearDown() {
+        bankAccountRepository.deleteById(accountId);;
+        userRepository.deleteById(ownerId);
+    }
+
     @Test
     public void testCreateBankAccount() throws Exception {
         BankAccountDTO bankAccount = new BankAccountDTO(1L, new BigDecimal("1234.12"),
@@ -153,12 +159,5 @@ public class BankAccountControllerTest {
         assertEquals(bankAccount.getOwner().getId(), bankAccountByRepository.getOwner().getId());
 
     }
-
-    @AfterEach
-    public void tearDown() {
-        bankAccountRepository.deleteById(accountId);;
-        userRepository.deleteById(ownerId);
-    }
-
 
 }

@@ -51,18 +51,24 @@ public class BankAccountControllerTest {
     public void setUp() {
         User user = new User(1L, "F1", "M1", "L1",
                 LocalDate.now().minusYears(20), new ArrayList<>(), "1234567890");
-        User newUser = userRepository.create(user);
+        User newUser = userRepository.save(user);
         ownerId = newUser.getId();
         BankAccount bankAccount = new BankAccount(1L, new BigDecimal(12345.12345),
-                userRepository.findById(BigInteger.valueOf(ownerId)) , new ArrayList<>());
-        BankAccount newBankAccount = bankAccountRepository.create(bankAccount);
+                userRepository.findById(ownerId).get() , new ArrayList<>());
+        BankAccount newBankAccount = bankAccountRepository.save(bankAccount);
         accountId = newBankAccount.getId();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        bankAccountRepository.deleteById(accountId);;
+        userRepository.deleteById(ownerId);
     }
 
     @Test
     public void testCreateBankAccount() throws Exception {
-        BankAccountDTO bankAccount = new BankAccountDTO(1L, new BigDecimal(1234.123),
-                UserMapper.toDTO(userRepository.findById(BigInteger.valueOf(ownerId))));
+        BankAccountDTO bankAccount = new BankAccountDTO(1L, new BigDecimal("1234.12"),
+                UserMapper.toDTO(userRepository.findById(ownerId).get()));
         String serializedBankAccount = objectMapper.writeValueAsString(bankAccount);
 
         MvcResult result = mockMvc.perform(post("/bank-account")
@@ -81,10 +87,10 @@ public class BankAccountControllerTest {
 
         assertNotNull(id);
 
-        BankAccount bankAccountByRepository = bankAccountRepository.findById(BigInteger.valueOf(id));
+        BankAccount bankAccountByRepository = bankAccountRepository.findById(id).get();
 
         assertNotNull(bankAccountByRepository);
-        assertEquals(bankAccount.getBalance(), bankAccountByRepository.getBalance());
+        assertEquals(bankAccount.getBalance().compareTo(bankAccountByRepository.getBalance()), 0);
         assertEquals(bankAccount.getOwner().getId(), bankAccountByRepository.getOwner().getId());
 
         MvcResult result1 = mockMvc.perform(get(String.format("/bank-account/%d", id)))
@@ -95,11 +101,11 @@ public class BankAccountControllerTest {
 
         assertNotNull(getBankAccount);
         assertEquals(id, getBankAccount.getId());
-        assertEquals(bankAccount.getBalance(), getBankAccount.getBalance());
+        assertEquals(bankAccount.getBalance().compareTo(getBankAccount.getBalance()), 0);
         assertEquals(bankAccount.getOwner().getId(), getBankAccount.getOwner().getId());
 
-        BankAccountDTO bankAccount2 = new BankAccountDTO(1L, new BigDecimal(1),
-                UserMapper.toDTO(userRepository.findById(BigInteger.valueOf(ownerId))));
+        BankAccountDTO bankAccount2 = new BankAccountDTO(1L, new BigDecimal("1.0"),
+                UserMapper.toDTO(userRepository.findById(ownerId).get()));
         String serializedBankAccount2 = objectMapper.writeValueAsString(bankAccount2);
         MvcResult result2 = mockMvc.perform(post(String.format("/bank-account/%d", id))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -111,14 +117,14 @@ public class BankAccountControllerTest {
 
         assertNotNull(updateBankAccount);
         assertEquals(id, updateBankAccount.getId());
-        assertEquals(bankAccount2.getBalance(), updateBankAccount.getBalance());
+        assertEquals(bankAccount2.getBalance().compareTo(updateBankAccount.getBalance()), 0);
         assertEquals(bankAccount2.getOwner().getId(), updateBankAccount.getOwner().getId());
 
-        BankAccount updateBankAccountByRepository = bankAccountRepository.findById(BigInteger.valueOf(id));
+        BankAccount updateBankAccountByRepository = bankAccountRepository.findById(id).get();
 
         assertNotNull(updateBankAccountByRepository);
         assertEquals(id, updateBankAccountByRepository.getId());
-        assertEquals(bankAccount2.getBalance(), updateBankAccountByRepository.getBalance());
+        assertEquals(bankAccount2.getBalance().compareTo(updateBankAccountByRepository.getBalance()), 0);
         assertEquals(bankAccount2.getOwner().getId(), updateBankAccountByRepository.getOwner().getId());
 
         MvcResult result3 = mockMvc.perform(delete(String.format("/bank-account/%d", id)))
@@ -153,12 +159,5 @@ public class BankAccountControllerTest {
         assertEquals(bankAccount.getOwner().getId(), bankAccountByRepository.getOwner().getId());
 
     }
-
-    @AfterEach
-    public void tearDown() {
-        bankAccountRepository.delete(BigInteger.valueOf(accountId));
-        userRepository.delete(BigInteger.valueOf(ownerId));
-    }
-
 
 }

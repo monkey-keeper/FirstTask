@@ -42,6 +42,12 @@ public class TransactionControllerTest {
     Long t3Id;
     Long t4Id;
 
+    String type1 = TransactionType.DEPOSIT.name();
+    String type2 = TransactionType.PAYMENT.name();
+    String category1 = "Category1";
+    String category2 = "Category2";
+    String category3 = "Category3";
+
     @Autowired
     private MockMvc mockMvc;
 
@@ -61,27 +67,27 @@ public class TransactionControllerTest {
     public void setUp() {
         User user = new User(1L, "F1", "M1", "L1",
                 LocalDate.now().minusYears(20), new ArrayList<>(), "1234567890");
-        User newUser = userRepository.create(user);
+        User newUser = userRepository.save(user);
         ownerId = newUser.getId();
 
         BankAccount bankAccount = new BankAccount(1L, new BigDecimal(12345.12345),
-                userRepository.findById(BigInteger.valueOf(ownerId)) , new ArrayList<>());
-        BankAccount newBankAccount = bankAccountRepository.create(bankAccount);
+                userRepository.findById(ownerId).get() , new ArrayList<>());
+        BankAccount newBankAccount = bankAccountRepository.save(bankAccount);
         accountId = newBankAccount.getId();
 
         Transaction transaction1 = new Transaction(1L, new BigDecimal(100), TransactionType.PAYMENT,
-                "Category1", bankAccount, LocalDateTime.now());
+                "Category1", newBankAccount, LocalDateTime.now());
         Transaction transaction2 = new Transaction(1L, new BigDecimal(100), TransactionType.PAYMENT,
-                "Category2", bankAccount, LocalDateTime.now());
+                "Category2", newBankAccount, LocalDateTime.now());
         Transaction transaction3 = new Transaction(1L, new BigDecimal(100), TransactionType.DEPOSIT,
-                "Category1", bankAccount, LocalDateTime.now());
+                "Category1", newBankAccount, LocalDateTime.now());
         Transaction transaction4 = new Transaction(1L, new BigDecimal(100), TransactionType.DEPOSIT,
-                "Category3", bankAccount, LocalDateTime.now());
+                "Category3", newBankAccount, LocalDateTime.now());
 
-        Transaction t1 = transactionRepository.create(transaction1);
-        Transaction t2 = transactionRepository.create(transaction2);
-        Transaction t3 = transactionRepository.create(transaction3);
-        Transaction t4 = transactionRepository.create(transaction4);
+        Transaction t1 = transactionRepository.save(transaction1);
+        Transaction t2 = transactionRepository.save(transaction2);
+        Transaction t3 = transactionRepository.save(transaction3);
+        Transaction t4 = transactionRepository.save(transaction4);
 
         t1Id = t1.getId();
         t2Id = t2.getId();
@@ -90,10 +96,23 @@ public class TransactionControllerTest {
 
     }
 
+    @AfterEach
+    public void tearDown() {
+        transactionRepository.deleteById(t1Id);
+        transactionRepository.deleteById(t2Id);
+        transactionRepository.deleteById(t3Id);
+        transactionRepository.deleteById(t4Id);
+
+        bankAccountRepository.deleteById(accountId);
+
+        userRepository.deleteById(ownerId);
+
+    }
+
     @Test
     public void testCreateTransaction() throws Exception {
-        TransactionDTO transaction = new TransactionDTO(1L, new BigDecimal(123), TransactionType.PAYMENT,
-                "TESTING", BankAccountMapper.toDTO(bankAccountRepository.findById(BigInteger.valueOf(accountId))));
+        TransactionDTO transaction = new TransactionDTO(1L, new BigDecimal("123"), TransactionType.PAYMENT,
+                "TESTING", BankAccountMapper.toDTO(bankAccountRepository.findById(accountId).get()));
         String serializedTransaction = objectMapper.writeValueAsString(transaction);
 
         MvcResult result = mockMvc.perform(post("/transaction")
@@ -106,7 +125,7 @@ public class TransactionControllerTest {
                 TransactionDTO.class);
 
         assertNotNull(createdTransaction);
-        assertEquals(transaction.getValue(), createdTransaction.getValue());
+        assertEquals(transaction.getValue().compareTo(createdTransaction.getValue()), 0);
         assertEquals(transaction.getType(), createdTransaction.getType());
         assertEquals(transaction.getCategory(), createdTransaction.getCategory());
         assertEquals(transaction.getBankAccount().getId(), createdTransaction.getBankAccount().getId());
@@ -115,10 +134,10 @@ public class TransactionControllerTest {
 
         assertNotNull(id);
 
-        Transaction transactionByRepository = transactionRepository.findById(BigInteger.valueOf(id));
+        Transaction transactionByRepository = transactionRepository.findById(id).get();
 
         assertNotNull(transactionByRepository);
-        assertEquals(transaction.getValue(), transactionByRepository.getValue());
+        assertEquals(transaction.getValue().compareTo(transactionByRepository.getValue()), 0);
         assertEquals(transaction.getType(), transactionByRepository.getType());
         assertEquals(transaction.getCategory(), transactionByRepository.getCategory());
         assertEquals(transaction.getBankAccount().getId(), transactionByRepository.getBankAccount().getId());
@@ -131,20 +150,13 @@ public class TransactionControllerTest {
 
         assertNotNull(getTransaction);
         assertEquals(id, getTransaction.getTransactionId());
-        assertEquals(transaction.getValue(), getTransaction.getValue());
+        assertEquals(transaction.getValue().compareTo(getTransaction.getValue()), 0);
         assertEquals(transaction.getType(), getTransaction.getType());
         assertEquals(transaction.getCategory(), getTransaction.getCategory());
         assertEquals(transaction.getBankAccount().getId(), getTransaction.getBankAccount().getId());
 
 
         //search test
-
-        String type1 = TransactionType.DEPOSIT.name();
-        String type2 = TransactionType.PAYMENT.name();
-        String category1 = "Category1";
-        String category2 = "Category2";
-        String category3 = "Category3";
-
         MvcResult firstResult = mockMvc.perform(get(String.format("/transaction/search?type=%s", type1)))
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
@@ -156,12 +168,13 @@ public class TransactionControllerTest {
             assertEquals(transaction1.getType().name(), type1);
         }
 
-        List<Transaction> transactionsByRepository = transactionRepository.findByCategoryAndType(null, type1);
+        List<Transaction> transactionsByRepository = transactionRepository.findByCategoryAndType(null,
+                TransactionType.valueOf(type1));
 
         assertEquals(transactions.size(), transactionsByRepository.size());
         for (int i = 0; i < transactions.size(); i++) {
             assertEquals(transactions.get(i).getTransactionId(), transactionsByRepository.get(i).getId());
-            assertEquals(transactions.get(i).getValue(), transactionsByRepository.get(i).getValue());
+            assertEquals(transactions.get(i).getValue().compareTo(transactionsByRepository.get(i).getValue()), 0);
             assertEquals(transactions.get(i).getType().name(), transactionsByRepository.get(i).getType().name());
         }
 
@@ -179,9 +192,9 @@ public class TransactionControllerTest {
         List<Transaction> secondTransactionByRepository = transactionRepository.findByCategoryAndType(category1, null);
 
         assertEquals(secondTransactions.size(), secondTransactionByRepository.size());
-        for (int i = 0; i < transactions.size(); i++) {
+        for (int i = 0; i < secondTransactions.size(); i++) {
             assertEquals(secondTransactions.get(i).getTransactionId(), secondTransactionByRepository.get(i).getId());
-            assertEquals(secondTransactions.get(i).getValue(), secondTransactionByRepository.get(i).getValue());
+            assertEquals(secondTransactions.get(i).getValue().compareTo(secondTransactionByRepository.get(i).getValue()), 0);
             assertEquals(secondTransactions.get(i).getCategory(), secondTransactionByRepository.get(i).getCategory());
         }
 
@@ -197,12 +210,13 @@ public class TransactionControllerTest {
             assertEquals(thirdTransaction.getType().name(), type1);
         }
 
-        List<Transaction> thirdTransactionByRepository = transactionRepository.findByCategoryAndType(category1, type1);
+        List<Transaction> thirdTransactionByRepository = transactionRepository.findByCategoryAndType(category1,
+                TransactionType.valueOf(type1));
 
         assertEquals(thirdTransactions.size(), thirdTransactionByRepository.size());
         for (int i = 0; i < thirdTransactions.size(); i++) {
             assertEquals(thirdTransactions.get(i).getTransactionId(), thirdTransactionByRepository.get(i).getId());
-            assertEquals(thirdTransactions.get(i).getValue(), thirdTransactionByRepository.get(i).getValue());
+            assertEquals(thirdTransactions.get(i).getValue().compareTo(thirdTransactionByRepository.get(i).getValue()), 0);
             assertEquals(thirdTransactions.get(i).getCategory(), thirdTransactionByRepository.get(i).getCategory());
             assertEquals(thirdTransactions.get(i).getBankAccount().getId(),
                     thirdTransactionByRepository.get(i).getBankAccount().getId());
@@ -211,8 +225,8 @@ public class TransactionControllerTest {
 
 
 
-        TransactionDTO transaction2 = new TransactionDTO(1L, new BigDecimal(1000), TransactionType.PAYMENT,
-                "TESTING", BankAccountMapper.toDTO(bankAccountRepository.findById(BigInteger.valueOf(accountId))));
+        TransactionDTO transaction2 = new TransactionDTO(1L, new BigDecimal("1000"), TransactionType.PAYMENT,
+                "TESTING", BankAccountMapper.toDTO(bankAccountRepository.findById(accountId).get()));
         String serializedTransaction2 = objectMapper.writeValueAsString(transaction2);
         MvcResult result2 = mockMvc.perform(post(String.format("/transaction/%d", id))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -226,12 +240,12 @@ public class TransactionControllerTest {
 
         assertNotNull(updateTransaction);
         assertEquals(id, updateTransaction.getTransactionId());
-        assertEquals(transaction2.getValue(), updateTransaction.getValue());
+        assertEquals(transaction2.getValue().compareTo(updateTransaction.getValue()), 0);
         assertEquals(transaction2.getType(), updateTransaction.getType());
         assertEquals(transaction2.getCategory(), updateTransaction.getCategory());
         assertEquals(transaction2.getBankAccount().getId(), updateTransaction.getBankAccount().getId());
 
-        Transaction updatedTransactionByRepository = transactionRepository.findById(BigInteger.valueOf(id));
+        Transaction updatedTransactionByRepository = transactionRepository.findById(id).get();
 
         assertNotNull(updatedTransactionByRepository);
         assertEquals(id, updatedTransactionByRepository.getId());
@@ -252,18 +266,19 @@ public class TransactionControllerTest {
                 .andExpect(status().is2xxSuccessful())
                 .andReturn();
 
-        List<Transaction> transactions = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<List<Transaction>>() {});
+        List<TransactionDTO> transactions = objectMapper.readValue(result.getResponse().getContentAsString(),
+                new TypeReference<List<TransactionDTO>>() {});
 
         assertFalse(transactions.isEmpty());
 
-        Transaction firstTransaction = transactions.get(0);
+        TransactionDTO firstTransaction = transactions.get(0);
 
-       // assertNotNull(firstTransaction.getId()); //TODO: что-то не так с id (в repository все нормально)
+        assertNotNull(firstTransaction.getTransactionId()); //TODO: что-то не так с id (в repository все нормально)
 
         Transaction firstTransactionByRepository = transactionRepository.findAll().get(0);
 
         assertNotNull(firstTransactionByRepository.getId());
-       // assertEquals(firstTransaction.getId(), firstTransactionByRepository.getId());
+        assertEquals(firstTransaction.getTransactionId(), firstTransactionByRepository.getId());
         assertEquals(firstTransaction.getValue(), firstTransactionByRepository.getValue());
         assertEquals(firstTransaction.getType(), firstTransactionByRepository.getType());
         assertEquals(firstTransaction.getCategory(), firstTransactionByRepository.getCategory());
@@ -288,7 +303,8 @@ public class TransactionControllerTest {
         assertFalse(transactions.isEmpty());
         assertEquals(transactions.get(0).getType().name(), type);
 
-        List<Transaction> transactionsByRepository = transactionRepository.findByCategoryAndType(null, type);
+        List<Transaction> transactionsByRepository = transactionRepository.findByCategoryAndType(null,
+                TransactionType.valueOf(type));
 
         assertEquals(transactions.size(), transactionsByRepository.size());
 
@@ -315,24 +331,10 @@ public class TransactionControllerTest {
         assertEquals(thirdTransactions.get(0).getCategory(), category);
         assertEquals(thirdTransactions.get(0).getType().name(), type);
 
-        List<Transaction> thirdTransactionByRepository = transactionRepository.findByCategoryAndType(category, type);
+        List<Transaction> thirdTransactionByRepository = transactionRepository.findByCategoryAndType(category,
+                TransactionType.valueOf(type));
 
         assertEquals(thirdTransactions.size(), thirdTransactionByRepository.size());
-
-    }
-
-    @AfterEach
-    public void tearDown() {
-        transactionRepository.delete(BigInteger.valueOf(t1Id));
-        transactionRepository.delete(BigInteger.valueOf(t2Id));
-        transactionRepository.delete(BigInteger.valueOf(t3Id));
-        transactionRepository.delete(BigInteger.valueOf(t4Id));
-
-        bankAccountRepository.delete(BigInteger.valueOf(accountId));
-
-        userRepository.delete(BigInteger.valueOf(ownerId));
-
-
 
     }
 

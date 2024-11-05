@@ -5,6 +5,7 @@ import gigabank.accountmanagement.mapper.UserMapper;
 import gigabank.accountmanagement.service.UserService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,10 +13,18 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/user")
-@AllArgsConstructor
+
 public class UserController {
     private final UserService userService;
     private final KafkaTemplate<String, Object> kafkaTemplate;
+
+    public UserController(UserService userService, KafkaTemplate<String, Object> kafkaTemplate) {
+        this.userService = userService;
+        this.kafkaTemplate = kafkaTemplate;
+    }
+
+    @Value("${tpd.topic-name}")
+    private String topicName;
 
     @GetMapping()
     public List<UserDTO> getAllUsers() {
@@ -31,8 +40,9 @@ public class UserController {
 
     @PostMapping()
     public UserDTO createUser(@RequestBody @Valid UserDTO userDTO) {
-        kafkaTemplate.send("tpd.topic-name", userDTO);
-        return UserMapper.toDTO(userService.create(UserMapper.fromDTO(userDTO)));
+        UserDTO saveUser = UserMapper.toDTO(userService.create(UserMapper.fromDTO(userDTO)));
+        kafkaTemplate.send(topicName, saveUser);
+        return saveUser;
     }
 
     @PostMapping("/{id}")

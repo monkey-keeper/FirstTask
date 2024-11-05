@@ -1,7 +1,9 @@
 package gigabank.accountmanagement.service;
 
+import gigabank.accountmanagement.dto.UserDTO;
 import gigabank.accountmanagement.entity.BankAccount;
 import gigabank.accountmanagement.entity.User;
+import gigabank.accountmanagement.mapper.UserMapper;
 import gigabank.accountmanagement.repository.BankAccountRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -16,8 +18,8 @@ public class KafkaService {
     private final BankAccountRepository bankAccountRepository;
 
     @KafkaListener(topics = "${tpd.topic-name}")
-    public void listen(User user) {
-        createBankAccountForUser(user);
+    public void listen(UserDTO user) {
+        createBankAccountForUser(UserMapper.fromDTO(user));
     }
 
     private void createBankAccountForUser(User user) {

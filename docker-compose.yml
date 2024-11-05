@@ -13,3 +13,17 @@ services:
       KAFKA_ADVERTISED_HOST_NAME: localhost
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
 
+  postgres-db:
+    image: postgres
+    container_name: postgres-db
+    environment:
+      POSTGRES_DB: GB_Docker_DB
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5454:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

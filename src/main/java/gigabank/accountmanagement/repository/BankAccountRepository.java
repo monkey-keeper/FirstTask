@@ -1,6 +1,7 @@
 package gigabank.accountmanagement.repository;
 
 import gigabank.accountmanagement.entity.BankAccount;
+import gigabank.accountmanagement.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,5 +10,4 @@ import java.util.List;
 
 @Repository
 public interface BankAccountRepository extends JpaRepository<BankAccount, Long> {
-
 }
